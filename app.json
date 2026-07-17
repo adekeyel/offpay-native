@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "OffPay",
+    "slug": "offpay-native",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "offpay",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F3F5F4",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.offpay.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "OffPay uses your camera to take your passport photo at signup and to scan QR codes for offline transfers.",
+        "NSFaceIDUsageDescription": "OffPay can use Face ID to quickly unlock the app instead of typing your PIN."
+      }
+    },
+    "android": {
+      "package": "app.offpay.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "OffPay uses your camera to take your passport photo at signup and to scan QR codes for offline transfers."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1F9D74"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ef55ecba-37b5-447c-884a-8e55e770dd31"
+      }
+    }
+  }
+}
