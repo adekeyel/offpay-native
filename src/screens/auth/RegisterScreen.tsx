@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { File } from 'expo-file-system/next';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -47,7 +48,11 @@ export default function RegisterScreen({ navigation }: Props) {
       fd.append('phone', phone);
       fd.append('bvn', bvn);
       fd.append('password', password);
-      fd.append('passport', { uri: passportUri, name: 'passport.jpg', type: 'image/jpeg' } as any);
+      // NOTE: the old RN-style `{ uri, name, type }` form part is NOT supported by this
+      // Expo SDK's fetch/FormData implementation and throws "Unsupported FormDataPart
+      // implementation". expo-file-system's File + .blob() is the supported replacement.
+      const passportFile = new File(passportUri);
+      fd.append('passport', passportFile.blob(), 'passport.jpg');
 
       const res = await authApi.register(fd);
       const deviceId = await getOrCreateDeviceId();
