@@ -11,6 +11,29 @@ export function resolveWallet(walletId: string) {
   );
 }
 
+export interface OfflineTokenResult {
+  offlineTokenId: string;
+  token: string;
+  balanceSnapshot: number;
+  offlineLimit: number;
+  lockedAmount: number;
+  lockPercent: number;
+  availablePercent: number;
+  expiresAt: string;
+}
+
+/**
+ * Call this while the device still has connectivity, before going offline —
+ * it fetches a fresh spending-cap token from the server (see wallet.service.js
+ * on the backend) and MUST have been called at least once, with a
+ * still-unexpired result, before any offline voucher can successfully sync.
+ * Without it, the server has nothing to check the 60/40 lock against and
+ * will reject the voucher outright.
+ */
+export function prepareOfflineMode() {
+  return apiFetch<{ success: true; message: string; data: OfflineTokenResult }>('/wallet/offline-token', { method: 'POST' });
+}
+
 export function getTransactionHistory(limit = 50) {
   return apiFetch<{ success: true; data: Transaction[] }>(`/transactions?limit=${limit}`);
 }

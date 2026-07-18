@@ -8,6 +8,7 @@ import HomeScreen from '../screens/home/HomeScreen';
 import VtuCategoryScreen from '../screens/vtu/VtuCategoryScreen';
 import SendOfflineScreen from '../screens/home/SendOfflineScreen';
 import ReceiveOfflineScreen from '../screens/home/ReceiveOfflineScreen';
+import BankTransferScreen from '../screens/home/BankTransferScreen';
 
 import CardScreen from '../screens/card/CardScreen';
 
@@ -26,6 +27,7 @@ export type HomeStackParamList = {
   VtuCategory: { category: 'airtime' | 'data' | 'cable' | 'electricity' };
   SendOffline: undefined;
   ReceiveOffline: undefined;
+  BankTransfer: undefined;
 };
 export type FinanceStackParamList = {
   FinanceMain: undefined;
@@ -46,6 +48,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="VtuCategory" component={VtuCategoryScreen} options={{ headerShown: true, title: '' }} />
       <HomeStackNav.Screen name="SendOffline" component={SendOfflineScreen} options={{ headerShown: true, title: 'Send (offline)' }} />
       <HomeStackNav.Screen name="ReceiveOffline" component={ReceiveOfflineScreen} options={{ headerShown: true, title: 'Receive (offline)' }} />
+      <HomeStackNav.Screen name="BankTransfer" component={BankTransferScreen} options={{ headerShown: true, title: 'Send to bank' }} />
     </HomeStackNav.Navigator>
   );
 }

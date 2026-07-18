@@ -13,6 +13,7 @@ const KEYS = {
   refreshToken: 'offpay_refresh_token',
   devicePrivateKey: 'offpay_device_private_key',
   deviceId: 'offpay_device_id',
+  offlineTokenCache: 'offpay_offline_token_cache',
 } as const;
 
 export async function getRefreshToken(): Promise<string | null> {
@@ -38,6 +39,23 @@ export async function getOrCreateDeviceId(): Promise<string> {
   const fresh = `device-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
   await SecureStore.setItemAsync(KEYS.deviceId, fresh);
   return fresh;
+}
+
+/**
+ * Caches the most recent offline spending-cap token (see wallet.ts's
+ * prepareOfflineMode) so it survives the app being backgrounded or losing
+ * connectivity after it was fetched — otherwise a device that goes offline
+ * before opening the Send screen again would have no token to authorize
+ * against, even though it successfully prepared one earlier.
+ */
+export async function getCachedOfflineToken(): Promise<{ token: string; offlineLimit: number; expiresAt: string } | null> {
+  const raw = await SecureStore.getItemAsync(KEYS.offlineTokenCache);
+  return raw ? JSON.parse(raw) : null;
+}
+
+export async function setCachedOfflineToken(data: { token: string; offlineLimit: number; expiresAt: string } | null): Promise<void> {
+  if (data) await SecureStore.setItemAsync(KEYS.offlineTokenCache, JSON.stringify(data));
+  else await SecureStore.deleteItemAsync(KEYS.offlineTokenCache);
 }
 
 /** Called on explicit logout — clears everything session-related, but deliberately NOT the device keypair (see clearAll below for why). */

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, Pressable, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import QRCode from 'react-native-qrcode-svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import { useAuth } from '../../context/AuthContext';
-import { getOrCreateDeviceId } from '../../auth/secureStorage';
+import { getOrCreateDeviceId, getCachedOfflineToken, setCachedOfflineToken } from '../../auth/secureStorage';
 import { getOrCreateKeypair } from '../../auth/deviceKey';
 import * as offlineTransferApi from '../../api/offlineTransfer';
 import * as walletApi from '../../api/wallet';
@@ -31,6 +31,36 @@ export default function SendOfflineScreen() {
   const [status, setStatus] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [scanLock, setScanLock] = useState(false);
+
+  // Checking / preparing / ready / blocked — this screen can't authorize any
+  // offline spend without an unexpired offline token (see wallet.service.js's
+  // reserveOfflineSpend, enforced server-side). We try to fetch a fresh one
+  // now (works if we're online); if that fails, we fall back to whatever was
+  // cached from a previous online session, as long as it hasn't expired.
+  const [offlineReadiness, setOfflineReadiness] = useState<'checking' | 'ready' | 'blocked'>('checking');
+  const [offlineLimitRemaining, setOfflineLimitRemaining] = useState<number | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await walletApi.prepareOfflineMode();
+        await setCachedOfflineToken({ token: res.data.token, offlineLimit: res.data.offlineLimit, expiresAt: res.data.expiresAt });
+        setOfflineLimitRemaining(res.data.offlineLimit);
+        setOfflineReadiness('ready');
+        return;
+      } catch {
+        // No connectivity right now (or KYC not approved, etc.) — fall back
+        // to a previously cached token rather than blocking outright.
+      }
+      const cached = await getCachedOfflineToken();
+      if (cached && new Date(cached.expiresAt).getTime() > Date.now()) {
+        setOfflineLimitRemaining(cached.offlineLimit);
+        setOfflineReadiness('ready');
+      } else {
+        setOfflineReadiness('blocked');
+      }
+    })();
+  }, []);
 
   async function lookupWalletId() {
     setManualError(null);
@@ -112,6 +142,31 @@ export default function SendOfflineScreen() {
     }
   }
 
+  if (offlineReadiness === 'checking') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <ActivityIndicator color={colors.ink} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (offlineReadiness === 'blocked') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <Text style={styles.title}>Connect to prepare offline mode</Text>
+          <Text style={styles.subtitle}>
+            OffPay caps how much you can spend offline to protect your balance. To send money
+            offline, you need to open this screen at least once while connected so it can set
+            your spending limit — then it'll keep working even after you lose signal.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   if (step === 'scan') {
     if (!permission) return null;
     if (!permission.granted) {
@@ -174,6 +229,9 @@ export default function SendOfflineScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.content}>
           <Text style={styles.title}>Send to {receiver.fullName}</Text>
+          {offlineLimitRemaining != null && (
+            <Text style={styles.limitText}>Up to ₦{offlineLimitRemaining.toLocaleString()} available offline right now.</Text>
+          )}
           {status && <Alert type={status.type}>{status.text}</Alert>}
           <Input label="Amount (₦)" value={amount} onChangeText={(v) => setAmount(v.replace(/[^0-9.]/g, ''))} keyboardType="numeric" autoFocus />
           <Button title="Sign transfer" onPress={generateVoucher} loading={loading} />
@@ -226,6 +284,7 @@ const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   title: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.ink, textAlign: 'center' },
   subtitle: { fontSize: fontSizes.sm, color: colors.slate, textAlign: 'center', marginTop: 8, marginBottom: spacing.lg, lineHeight: 18 },
+  limitText: { fontSize: fontSizes.xs, color: colors.unlock, fontWeight: '600', marginBottom: spacing.md },
   qrBox: { alignSelf: 'center', padding: spacing.lg, backgroundColor: colors.white, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.line, marginBottom: spacing.md },
   amountLabel: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.ink, textAlign: 'center', marginBottom: spacing.lg },
   scanOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: spacing.lg },
