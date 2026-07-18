@@ -5,6 +5,12 @@ export function getWalletSummary() {
   return apiFetch<{ success: true; data: WalletSummary }>('/wallet/summary');
 }
 
+export function resolveWallet(walletId: string) {
+  return apiFetch<{ success: true; data: { userId: string; walletId: string; accountNumber: string; accountName: string } }>(
+    `/wallet/resolve?walletId=${encodeURIComponent(walletId)}`
+  );
+}
+
 export function getTransactionHistory(limit = 50) {
   return apiFetch<{ success: true; data: Transaction[] }>(`/transactions?limit=${limit}`);
 }

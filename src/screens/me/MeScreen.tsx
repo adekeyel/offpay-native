@@ -48,7 +48,7 @@ export default function MeScreen({ navigation }: Props) {
         <View style={styles.menuList}>
           <MenuRow icon="📄" label="Transaction history" onPress={() => navigation.navigate('TransactionHistory')} />
           <MenuRow icon="🧾" label="Statement of account" onPress={() => navigation.navigate('Statement')} />
-          <MenuRow icon="🔐" label="Settings & Security" onPress={() => {}} />
+          <MenuRow icon="🔐" label="Settings & Security" onPress={() => navigation.navigate('SettingsSecurity')} />
           <MenuRow icon="💬" label="Support" onPress={() => {}} />
           <MenuRow icon="↪" label="Log out" onPress={logout} danger />
         </View>

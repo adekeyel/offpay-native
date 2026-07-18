@@ -9,11 +9,12 @@ import { useAuth } from '../../context/AuthContext';
 import { getOrCreateDeviceId } from '../../auth/secureStorage';
 import { getOrCreateKeypair } from '../../auth/deviceKey';
 import * as offlineTransferApi from '../../api/offlineTransfer';
+import * as walletApi from '../../api/wallet';
 import { addToOutbox, removeFromOutbox } from '../../offline/voucherOutbox';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { SignedVoucher } from '../../api/offlineTransfer';
 
-type Step = 'scan' | 'amount' | 'show-voucher' | 'done';
+type Step = 'scan' | 'manual' | 'amount' | 'show-voucher' | 'done';
 
 export default function SendOfflineScreen() {
   const { session } = useAuth();
@@ -22,11 +23,32 @@ export default function SendOfflineScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const [step, setStep] = useState<Step>('scan');
   const [receiver, setReceiver] = useState<{ userId: string; fullName: string } | null>(null);
+  const [walletIdInput, setWalletIdInput] = useState('');
+  const [manualLoading, setManualLoading] = useState(false);
+  const [manualError, setManualError] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const [voucher, setVoucher] = useState<SignedVoucher | null>(null);
   const [status, setStatus] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [scanLock, setScanLock] = useState(false);
+
+  async function lookupWalletId() {
+    setManualError(null);
+    if (!walletIdInput.trim()) return setManualError('Enter a wallet ID.');
+    setManualLoading(true);
+    try {
+      const res = await walletApi.resolveWallet(walletIdInput.trim());
+      setReceiver({ userId: res.data.userId, fullName: res.data.accountName });
+      setStep('amount');
+    } catch (err: any) {
+      // This lookup needs a connection (unlike the QR path, which is fully
+      // offline) — a network error here just means "try the QR instead"
+      // rather than something being broken.
+      setManualError(err.message || 'Could not find that wallet ID. Check the ID or try scanning their QR code instead.');
+    } finally {
+      setManualLoading(false);
+    }
+  }
 
   function handleScan(data: string) {
     if (scanLock) return;
@@ -112,6 +134,36 @@ export default function SendOfflineScreen() {
         <View style={styles.scanOverlay}>
           <Text style={styles.scanHint}>Point at the receiver's Receive screen</Text>
           {status && <Alert type={status.type}>{status.text}</Alert>}
+          <Pressable onPress={() => setStep('manual')} style={{ marginTop: spacing.md }}>
+            <Text style={[styles.link, { color: colors.white }]}>Enter wallet ID manually instead</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (step === 'manual') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Enter wallet ID</Text>
+          <Text style={styles.subtitle}>
+            This needs a connection to look up the account (unlike scanning, which works fully
+            offline). Ask the receiver for their wallet ID — it's shown on their Home screen.
+          </Text>
+          {manualError && <Alert type="error">{manualError}</Alert>}
+          <Input
+            label="Wallet ID"
+            placeholder="OP-0000-0000"
+            value={walletIdInput}
+            onChangeText={setWalletIdInput}
+            autoCapitalize="characters"
+            autoFocus
+          />
+          <Button title="Find account" onPress={lookupWalletId} loading={manualLoading} />
+          <Pressable onPress={() => setStep('scan')} style={{ marginTop: spacing.md }}>
+            <Text style={styles.link}>Scan their QR code instead</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );

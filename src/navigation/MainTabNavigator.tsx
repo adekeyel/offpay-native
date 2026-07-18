@@ -19,6 +19,7 @@ import RewardsScreen from '../screens/rewards/RewardsScreen';
 import MeScreen from '../screens/me/MeScreen';
 import StatementScreen from '../screens/me/StatementScreen';
 import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
+import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -34,6 +35,7 @@ export type MeStackParamList = {
   MeMain: undefined;
   Statement: undefined;
   TransactionHistory: undefined;
+  SettingsSecurity: undefined;
 };
 
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
@@ -83,6 +85,7 @@ function MeStack() {
       <MeStackNav.Screen name="MeMain" component={MeScreen} />
       <MeStackNav.Screen name="Statement" component={StatementScreen} options={{ headerShown: true, title: 'Statement of Account' }} />
       <MeStackNav.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ headerShown: true, title: 'Transactions' }} />
+      <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />
     </MeStackNav.Navigator>
   );
 }
