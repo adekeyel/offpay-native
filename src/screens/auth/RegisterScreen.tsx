@@ -50,9 +50,10 @@ export default function RegisterScreen({ navigation }: Props) {
       fd.append('password', password);
       // NOTE: the old RN-style `{ uri, name, type }` form part is NOT supported by this
       // Expo SDK's fetch/FormData implementation and throws "Unsupported FormDataPart
-      // implementation". expo-file-system's File + .blob() is the supported replacement.
+      // implementation". In expo-file-system 57.x, `File` implements the `Blob` interface
+      // directly (there is no separate .blob() method) — pass the File instance itself.
       const passportFile = new File(passportUri);
-      fd.append('passport', passportFile.blob(), 'passport.jpg');
+      fd.append('passport', passportFile, 'passport.jpg');
 
       const res = await authApi.register(fd);
       const deviceId = await getOrCreateDeviceId();
