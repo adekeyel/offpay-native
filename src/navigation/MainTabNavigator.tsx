@@ -9,6 +9,7 @@ import VtuCategoryScreen from '../screens/vtu/VtuCategoryScreen';
 import SendOfflineScreen from '../screens/home/SendOfflineScreen';
 import ReceiveOfflineScreen from '../screens/home/ReceiveOfflineScreen';
 import BankTransferScreen from '../screens/home/BankTransferScreen';
+import AddMoneyScreen from '../screens/home/AddMoneyScreen';
 
 import CardScreen from '../screens/card/CardScreen';
 
@@ -21,6 +22,8 @@ import MeScreen from '../screens/me/MeScreen';
 import StatementScreen from '../screens/me/StatementScreen';
 import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
 import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
+import TierUpgradeScreen from '../screens/me/TierUpgradeScreen';
+import SupportScreen from '../screens/me/SupportScreen';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -28,6 +31,7 @@ export type HomeStackParamList = {
   SendOffline: undefined;
   ReceiveOffline: undefined;
   BankTransfer: undefined;
+  AddMoney: undefined;
 };
 export type FinanceStackParamList = {
   FinanceMain: undefined;
@@ -38,6 +42,8 @@ export type MeStackParamList = {
   Statement: undefined;
   TransactionHistory: undefined;
   SettingsSecurity: undefined;
+  TierUpgrade: undefined;
+  Support: undefined;
 };
 
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
@@ -49,6 +55,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="SendOffline" component={SendOfflineScreen} options={{ headerShown: true, title: 'Send (offline)' }} />
       <HomeStackNav.Screen name="ReceiveOffline" component={ReceiveOfflineScreen} options={{ headerShown: true, title: 'Receive (offline)' }} />
       <HomeStackNav.Screen name="BankTransfer" component={BankTransferScreen} options={{ headerShown: true, title: 'Send to bank' }} />
+      <HomeStackNav.Screen name="AddMoney" component={AddMoneyScreen} options={{ headerShown: true, title: 'Add Money' }} />
     </HomeStackNav.Navigator>
   );
 }
@@ -89,6 +96,8 @@ function MeStack() {
       <MeStackNav.Screen name="Statement" component={StatementScreen} options={{ headerShown: true, title: 'Statement of Account' }} />
       <MeStackNav.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ headerShown: true, title: 'Transactions' }} />
       <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />
+      <MeStackNav.Screen name="TierUpgrade" component={TierUpgradeScreen} options={{ headerShown: true, title: 'Upgrade Tier' }} />
+      <MeStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: true, title: 'Support' }} />
     </MeStackNav.Navigator>
   );
 }

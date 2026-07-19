@@ -150,10 +150,23 @@ export interface UserProfile {
   kyc_status: string;
   kyc_tier: number;
   address: string | null;
+  tier_upgrade_status: 'pending' | 'approved' | 'rejected' | null;
+  tier_upgrade_notes: string | null;
   two_fa_enabled: boolean;
   is_email_verified: boolean;
   is_phone_verified: boolean;
   created_at: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  user_id: string | null;
+  subject: string;
+  message: string;
+  status: string;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ApiErrorShape {

@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import Input from '../../components/Input';
+import AdBanner from '../../components/AdBanner';
 import * as loanApi from '../../api/loans';
 import * as wealthApi from '../../api/wealth';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
@@ -30,6 +31,7 @@ export default function FinanceScreen({ navigation }: Props) {
           </Pressable>
         </View>
       </View>
+      <AdBanner page="finance" position="middle" />
       {subTab === 'loan' ? <LoanTab /> : <WealthTab navigation={navigation} />}
     </SafeAreaView>
   );

@@ -4,6 +4,10 @@ import { getRefreshToken, setRefreshToken } from '../auth/secureStorage';
 // Next.js's NEXT_PUBLIC_ — set this in your .env or eas.json per environment.
 export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
 
+// The backend serves /uploads (passport photos, ad media, etc.) directly off
+// the app root, not under /api — see src/app.js on the backend.
+export const ASSET_BASE_URL = API_URL.replace(/\/api\/?$/, '');
+
 let accessToken: string | null = null;
 let onSessionExpired: (() => void) | null = null;
 

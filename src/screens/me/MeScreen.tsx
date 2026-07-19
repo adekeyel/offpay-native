@@ -32,7 +32,12 @@ export default function MeScreen({ navigation }: Props) {
           <View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>
           <View>
             <Text style={styles.name}>{profile?.full_name ?? ''}</Text>
-            <View style={styles.tierBadge}><Text style={styles.tierText}>KYC Tier {profile?.kyc_tier ?? 1}</Text></View>
+            <View style={styles.tierRow}>
+              <View style={styles.tierBadge}><Text style={styles.tierText}>KYC Tier {profile?.kyc_tier ?? 1}</Text></View>
+              {profile?.tier_upgrade_status === 'pending' && (
+                <View style={[styles.tierBadge, styles.pendingBadge]}><Text style={styles.pendingText}>Upgrade pending</Text></View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -48,8 +53,9 @@ export default function MeScreen({ navigation }: Props) {
         <View style={styles.menuList}>
           <MenuRow icon="📄" label="Transaction history" onPress={() => navigation.navigate('TransactionHistory')} />
           <MenuRow icon="🧾" label="Statement of account" onPress={() => navigation.navigate('Statement')} />
+          <MenuRow icon="⬆️" label="Request tier upgrade" onPress={() => navigation.navigate('TierUpgrade')} />
           <MenuRow icon="🔐" label="Settings & Security" onPress={() => navigation.navigate('SettingsSecurity')} />
-          <MenuRow icon="💬" label="Support" onPress={() => {}} />
+          <MenuRow icon="💬" label="Support" onPress={() => navigation.navigate('Support')} />
           <MenuRow icon="↪" label="Log out" onPress={logout} danger />
         </View>
       </ScrollView>
@@ -85,6 +91,9 @@ const styles = StyleSheet.create({
   name: { fontSize: fontSizes.md, fontWeight: '700', color: colors.ink },
   tierBadge: { marginTop: 4, backgroundColor: colors.unlockDim, borderRadius: radius.pill, paddingVertical: 2, paddingHorizontal: 10, alignSelf: 'flex-start' },
   tierText: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.unlock },
+  tierRow: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
+  pendingBadge: { backgroundColor: colors.lockDim },
+  pendingText: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.lock },
   infoList: { backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', marginBottom: spacing.lg },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.line },
   infoLabel: { fontSize: fontSizes.sm, color: colors.slate },

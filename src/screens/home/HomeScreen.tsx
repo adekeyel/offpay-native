@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as walletApi from '../../api/wallet';
 import { useAuth } from '../../context/AuthContext';
+import AdBanner from '../../components/AdBanner';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/MainTabNavigator';
 import type { WalletSummary } from '../../types/api';
@@ -68,7 +69,9 @@ export default function HomeScreen({ navigation }: Props) {
           )}
           <View style={styles.balanceBottomRow}>
             <Text style={styles.accountNumber}>{summary?.walletId ?? ''}</Text>
-            <View style={styles.addMoneyBtn}><Text style={styles.addMoneyText}>+ Add Money</Text></View>
+            <Pressable style={styles.addMoneyBtn} onPress={() => navigation.navigate('AddMoney')}>
+              <Text style={styles.addMoneyText}>+ Add Money</Text>
+            </Pressable>
           </View>
         </View>
 
@@ -80,6 +83,8 @@ export default function HomeScreen({ navigation }: Props) {
           <QuickAction icon="📥" label="Receive" onPress={() => navigation.navigate('ReceiveOffline')} />
           <QuickAction icon="💳" label="Cards" onPress={() => navigation.getParent()?.navigate('Card' as never)} />
         </View>
+
+        <AdBanner page="dashboard" position="middle" />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Airtime, data & bills</Text>
