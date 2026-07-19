@@ -56,7 +56,7 @@ export function purchaseVtu(params: { category: string; provider: string; recipi
 export function getMyCard() {
   return apiFetch<{ success: true; data: Card | null }>('/cards/mine');
 }
-
+git
 export function createCard() {
   return apiFetch<{ success: true; data: Card }>('/cards', { method: 'POST' });
 }
