@@ -28,7 +28,7 @@ export default function UnlockScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Enter your 4-digit PIN to unlock OffPay.</Text>
+        <Text style={styles.subtitle}>Enter your 4-digit PIN to unlock OffPay — works even with no internet.</Text>
 
         <PinInput onComplete={handlePin} disabled={loading} resetSignal={resetSignal} />
 

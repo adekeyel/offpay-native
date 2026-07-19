@@ -150,12 +150,22 @@ export interface UserProfile {
   kyc_status: string;
   kyc_tier: number;
   address: string | null;
+  gender: 'male' | 'female' | null;
+  date_of_birth: string | null;
   tier_upgrade_status: 'pending' | 'approved' | 'rejected' | null;
   tier_upgrade_notes: string | null;
   two_fa_enabled: boolean;
   is_email_verified: boolean;
   is_phone_verified: boolean;
   created_at: string;
+}
+
+/** Tier limits shown to the user when explaining what each KYC tier unlocks. */
+export interface TierInfo {
+  tier: number;
+  name: string;
+  dailyLimit: number;
+  maxBalance: number;
 }
 
 export interface SupportTicket {

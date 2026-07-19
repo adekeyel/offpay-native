@@ -37,7 +37,10 @@ export default function LoginScreen({}: Props) {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Log in to send, receive, and manage your wallet.</Text>
+        <Text style={styles.subtitle}>
+          Log in to send, receive, and manage your wallet. This first step needs a connection — after
+          that, unlocking OffPay on this device works even offline.
+        </Text>
 
         {error && <Alert type="error">{error}</Alert>}
 

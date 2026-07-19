@@ -1,20 +1,40 @@
 import * as SecureStore from 'expo-secure-store';
+import type { User } from '../types/api';
 
 /**
  * Everything in here is stored via expo-secure-store, which uses the iOS
- * Keychain / Android Keystore — never plain AsyncStorage. The two things
- * that live here (refresh token, device Ed25519 private key) are exactly
- * the two things that must never leak: the refresh token is a 180-day
- * bearer credential, and the private key is what proves this device's
- * identity when signing offline transfer vouchers — if either leaked from
- * disk, that would be a real compromise, not just an inconvenience.
+ * Keychain / Android Keystore — never plain AsyncStorage. This now also
+ * holds the locally-verifiable PIN records (salted/hashed, never the raw
+ * PIN) that let the app-lock PIN and transaction PIN be checked entirely on
+ * -device, with no network round trip — see ../auth/localAuth.ts for the
+ * hashing itself. That's what makes Unlock and "authorize with PIN" work
+ * with zero connectivity, which is the whole point of an offline-first
+ * wallet app.
  */
 const KEYS = {
   refreshToken: 'offpay_refresh_token',
   devicePrivateKey: 'offpay_device_private_key',
   deviceId: 'offpay_device_id',
   offlineTokenCache: 'offpay_offline_token_cache',
+  cachedUser: 'offpay_cached_user',
+  lockPinRecord: 'offpay_lock_pin_record',
+  txnPinRecord: 'offpay_txn_pin_record',
+  lockPinAttempts: 'offpay_lock_pin_attempts',
+  txnPinAttempts: 'offpay_txn_pin_attempts',
 } as const;
+
+export type PinKind = 'lock' | 'transaction';
+
+export interface LocalPinRecord {
+  saltB64: string;
+  hashB64: string;
+  iterations: number;
+}
+
+export interface PinAttemptState {
+  failedCount: number;
+  lockedUntil: number | null; // epoch ms
+}
 
 export async function getRefreshToken(): Promise<string | null> {
   return SecureStore.getItemAsync(KEYS.refreshToken);
@@ -58,18 +78,71 @@ export async function setCachedOfflineToken(data: { token: string; offlineLimit:
   else await SecureStore.deleteItemAsync(KEYS.offlineTokenCache);
 }
 
-/** Called on explicit logout — clears everything session-related, but deliberately NOT the device keypair (see clearAll below for why). */
+/**
+ * A snapshot of the last known-good `User` object, refreshed on every
+ * successful login/unlock while online. Lets Unlock populate the session
+ * immediately after a correct PIN even with zero connectivity — the app
+ * doesn't need a fresh server response just to know who you are and show
+ * your name; wallet/transaction data still loads (or fails gracefully) from
+ * their own screens the normal way.
+ */
+export async function getCachedUser(): Promise<User | null> {
+  const raw = await SecureStore.getItemAsync(KEYS.cachedUser);
+  return raw ? JSON.parse(raw) : null;
+}
+
+export async function setCachedUser(user: User | null): Promise<void> {
+  if (user) await SecureStore.setItemAsync(KEYS.cachedUser, JSON.stringify(user));
+  else await SecureStore.deleteItemAsync(KEYS.cachedUser);
+}
+
+function recordKey(kind: PinKind) {
+  return kind === 'lock' ? KEYS.lockPinRecord : KEYS.txnPinRecord;
+}
+
+export async function getLocalPinRecord(kind: PinKind): Promise<LocalPinRecord | null> {
+  const raw = await SecureStore.getItemAsync(recordKey(kind));
+  return raw ? JSON.parse(raw) : null;
+}
+
+export async function setLocalPinRecord(kind: PinKind, record: LocalPinRecord | null): Promise<void> {
+  if (record) await SecureStore.setItemAsync(recordKey(kind), JSON.stringify(record));
+  else await SecureStore.deleteItemAsync(recordKey(kind));
+}
+
+function attemptsKey(kind: PinKind) {
+  return kind === 'lock' ? KEYS.lockPinAttempts : KEYS.txnPinAttempts;
+}
+
+export async function getPinAttemptState(kind: PinKind): Promise<PinAttemptState> {
+  const raw = await SecureStore.getItemAsync(attemptsKey(kind));
+  return raw ? JSON.parse(raw) : { failedCount: 0, lockedUntil: null };
+}
+
+export async function setPinAttemptState(kind: PinKind, state: PinAttemptState): Promise<void> {
+  await SecureStore.setItemAsync(attemptsKey(kind), JSON.stringify(state));
+}
+
+/** Called on explicit logout — clears session + cached identity, but deliberately NOT the device keypair or local PIN records (see clearAll below for why). */
 export async function clearSession(): Promise<void> {
   await SecureStore.deleteItemAsync(KEYS.refreshToken);
+  await SecureStore.deleteItemAsync(KEYS.cachedUser);
 }
 
 /**
- * Full wipe, including the device signing key. Only call this for a genuine
- * "remove this account from this device" action — not a normal logout —
- * since it invalidates this device's ability to sign vouchers as this user
- * (a new keypair would need registering again via POST /devices/key).
+ * Full wipe, including the device signing key and local PIN records. Only
+ * call this for a genuine "remove this account from this device" action —
+ * not a normal logout — since it invalidates this device's ability to sign
+ * vouchers as this user (a new keypair would need registering again via
+ * POST /devices/key) and forces PINs to be re-set next time this user signs
+ * in on this device.
  */
 export async function clearAll(): Promise<void> {
   await SecureStore.deleteItemAsync(KEYS.refreshToken);
   await SecureStore.deleteItemAsync(KEYS.devicePrivateKey);
+  await SecureStore.deleteItemAsync(KEYS.cachedUser);
+  await SecureStore.deleteItemAsync(KEYS.lockPinRecord);
+  await SecureStore.deleteItemAsync(KEYS.txnPinRecord);
+  await SecureStore.deleteItemAsync(KEYS.lockPinAttempts);
+  await SecureStore.deleteItemAsync(KEYS.txnPinAttempts);
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, Pressable, ActivityIndicator } from 'react-native';
 import * as userApi from '../../api/user';
 import * as authApi from '../../api/auth';
+import { setLocalPin } from '../../auth/localAuth';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 
 type SectionKey = 'password' | 'pin' | 'lock' | null;
@@ -116,6 +117,10 @@ function TransactionPinForm({ onDone }: { onDone: () => void }) {
     setLoading(true);
     try {
       await userApi.setTransactionPin(pin, currentPassword);
+      // Mirror the new PIN into the on-device hash — this is what lets it
+      // be checked offline (with zero network) before signing any offline
+      // transfer, instead of only ever being usable while connected.
+      await setLocalPin('transaction', pin);
       setSuccess(true);
       setCurrentPassword('');
       setPin('');
@@ -132,6 +137,10 @@ function TransactionPinForm({ onDone }: { onDone: () => void }) {
     <View style={{ gap: spacing.sm }}>
       {error && <Text style={styles.errorText}>{error}</Text>}
       {success && <Text style={styles.successText}>Transaction PIN updated.</Text>}
+      <Text style={styles.helperText}>
+        Setting this needs a connection once. After that, it works to authorize transfers — including
+        offline ones — with no internet needed.
+      </Text>
       <TextInput style={styles.input} placeholder="Account password" secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} />
       <TextInput style={styles.input} placeholder="New 4-digit PIN" secureTextEntry keyboardType="number-pad" maxLength={4} value={pin} onChangeText={setPin} />
       <TextInput style={styles.input} placeholder="Confirm PIN" secureTextEntry keyboardType="number-pad" maxLength={4} value={confirmPin} onChangeText={setConfirmPin} />
@@ -156,6 +165,9 @@ function AppLockPinForm({ onDone }: { onDone: () => void }) {
     setLoading(true);
     try {
       await authApi.setAppLockPin(pin);
+      // Same idea as the transaction PIN above — keep the on-device hash
+      // in sync so Unlock keeps working offline after a PIN change.
+      await setLocalPin('lock', pin);
       setSuccess(true);
       setPin('');
       setConfirmPin('');

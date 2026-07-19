@@ -27,7 +27,7 @@ export default function StandaloneSetPinScreen({ user }: { user: User }) {
     setLoading(true);
     try {
       await authApi.setAppLockPin(pin);
-      confirmPinSet(user);
+      await confirmPinSet(user, pin);
     } catch (err: any) {
       setError(err.message || 'Could not set PIN.');
       setFirstPin(null);
@@ -42,7 +42,8 @@ export default function StandaloneSetPinScreen({ user }: { user: User }) {
         <Text style={styles.title}>Set your app-lock PIN</Text>
         <Text style={styles.subtitle}>
           This 4-digit PIN is separate from your password — you'll use it to quickly unlock OffPay
-          each time you come back, instead of logging in from scratch.
+          each time you come back, instead of logging in from scratch. Once set, unlocking works
+          even with no internet connection.
         </Text>
 
         {error && <Alert type="error">{error}</Alert>}

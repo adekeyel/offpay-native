@@ -5,19 +5,21 @@ import QRCode from 'react-native-qrcode-svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
-import { useAuth } from '../../context/AuthContext';
+import PinInput from '../../components/PinInput';
+import { useAuth, formatLockoutMessage } from '../../context/AuthContext';
 import { getOrCreateDeviceId, getCachedOfflineToken, setCachedOfflineToken } from '../../auth/secureStorage';
 import { getOrCreateKeypair } from '../../auth/deviceKey';
+import { hasLocalPin } from '../../auth/localAuth';
 import * as offlineTransferApi from '../../api/offlineTransfer';
 import * as walletApi from '../../api/wallet';
 import { addToOutbox, removeFromOutbox } from '../../offline/voucherOutbox';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { SignedVoucher } from '../../api/offlineTransfer';
 
-type Step = 'scan' | 'manual' | 'amount' | 'show-voucher' | 'done';
+type Step = 'scan' | 'manual' | 'amount' | 'pin' | 'show-voucher' | 'done';
 
 export default function SendOfflineScreen() {
-  const { session } = useAuth();
+  const { session, verifyTransactionPin } = useAuth();
   const senderId = session.status === 'unlocked' ? session.user.id : null;
 
   const [permission, requestPermission] = useCameraPermissions();
@@ -31,6 +33,13 @@ export default function SendOfflineScreen() {
   const [status, setStatus] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [scanLock, setScanLock] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinResetSignal, setPinResetSignal] = useState(0);
+  const [txnPinReady, setTxnPinReady] = useState<'checking' | 'ready' | 'not-set'>('checking');
+
+  useEffect(() => {
+    hasLocalPin('transaction').then((ok) => setTxnPinReady(ok ? 'ready' : 'not-set'));
+  }, []);
 
   // Checking / preparing / ready / blocked — this screen can't authorize any
   // offline spend without an unexpired offline token (see wallet.service.js's
@@ -95,6 +104,33 @@ export default function SendOfflineScreen() {
     }
   }
 
+  function proceedToPin() {
+    setStatus(null);
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return setStatus({ type: 'error', text: 'Enter a valid amount.' });
+    setPinError(null);
+    setStep('pin');
+  }
+
+  async function handlePinComplete(pin: string) {
+    setPinError(null);
+    // Fully offline check — verified against the on-device hash only, no
+    // network call, so this authorizes the transfer even with zero signal.
+    const result = await verifyTransactionPin(pin);
+    if (!result.ok) {
+      if (result.reason === 'no-local-pin') {
+        setPinError('No transaction PIN set on this device yet.');
+      } else if (result.reason === 'locked-out') {
+        setPinError(formatLockoutMessage(result.retryAt));
+      } else {
+        setPinError(`Incorrect PIN. ${result.attemptsRemaining} attempt(s) left.`);
+      }
+      setPinResetSignal((n) => n + 1);
+      return;
+    }
+    await generateVoucher();
+  }
+
   async function generateVoucher() {
     setStatus(null);
     const amt = parseFloat(amount);
@@ -114,6 +150,7 @@ export default function SendOfflineScreen() {
       await addToOutbox({ voucher: signed, deviceId, receiverName: receiver.fullName, createdAt: Date.now() });
     } catch (err: any) {
       setStatus({ type: 'error', text: err.message || 'Could not sign the transfer on this device.' });
+      setStep('amount');
     } finally {
       setLoading(false);
     }
@@ -232,9 +269,34 @@ export default function SendOfflineScreen() {
           {offlineLimitRemaining != null && (
             <Text style={styles.limitText}>Up to ₦{offlineLimitRemaining.toLocaleString()} available offline right now.</Text>
           )}
+          {txnPinReady === 'not-set' && (
+            <Alert type="info">
+              You haven't set a transaction PIN on this device yet. That needs a connection once — go to
+              Settings & Security → Transaction PIN, then come back here (it'll work offline after that).
+            </Alert>
+          )}
           {status && <Alert type={status.type}>{status.text}</Alert>}
           <Input label="Amount (₦)" value={amount} onChangeText={(v) => setAmount(v.replace(/[^0-9.]/g, ''))} keyboardType="numeric" autoFocus />
-          <Button title="Sign transfer" onPress={generateVoucher} loading={loading} />
+          <Button title="Continue" onPress={proceedToPin} disabled={txnPinReady !== 'ready'} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (step === 'pin') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Enter your transaction PIN</Text>
+          <Text style={styles.subtitle}>
+            Authorizes sending ₦{Number(parseFloat(amount) || 0).toLocaleString()} to {receiver?.fullName}. Checked
+            on this device — no internet needed.
+          </Text>
+          <PinInput onComplete={handlePinComplete} disabled={loading} resetSignal={pinResetSignal} />
+          {pinError && <View style={{ marginTop: spacing.lg }}><Alert type="error">{pinError}</Alert></View>}
+          <Pressable onPress={() => setStep('amount')} style={{ marginTop: spacing.xl }}>
+            <Text style={styles.link}>Back</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );

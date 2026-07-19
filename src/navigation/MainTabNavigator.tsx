@@ -19,6 +19,7 @@ import WealthProductScreen from '../screens/finance/WealthProductScreen';
 import RewardsScreen from '../screens/rewards/RewardsScreen';
 
 import MeScreen from '../screens/me/MeScreen';
+import ProfileScreen from '../screens/me/ProfileScreen';
 import StatementScreen from '../screens/me/StatementScreen';
 import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
 import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
@@ -39,6 +40,7 @@ export type FinanceStackParamList = {
 };
 export type MeStackParamList = {
   MeMain: undefined;
+  Profile: undefined;
   Statement: undefined;
   TransactionHistory: undefined;
   SettingsSecurity: undefined;
@@ -93,6 +95,7 @@ function MeStack() {
   return (
     <MeStackNav.Navigator screenOptions={{ headerShown: false }}>
       <MeStackNav.Screen name="MeMain" component={MeScreen} />
+      <MeStackNav.Screen name="Profile" component={ProfileScreen} options={{ headerShown: true, title: 'My Profile' }} />
       <MeStackNav.Screen name="Statement" component={StatementScreen} options={{ headerShown: true, title: 'Statement of Account' }} />
       <MeStackNav.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ headerShown: true, title: 'Transactions' }} />
       <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />

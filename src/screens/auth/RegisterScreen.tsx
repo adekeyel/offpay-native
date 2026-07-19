@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import GenderToggle from '../../components/GenderToggle';
 import * as authApi from '../../api/auth';
 import { getOrCreateDeviceId } from '../../auth/secureStorage';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -18,6 +19,8 @@ export default function RegisterScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [bvn, setBvn] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState(''); // YYYY-MM-DD
   const [password, setPassword] = useState('');
   const [passportUri, setPassportUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +36,31 @@ export default function RegisterScreen({ navigation }: Props) {
     if (!result.canceled) setPassportUri(result.assets[0].uri);
   }
 
+  function parseDob(v: string): Date | null {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v.trim());
+    if (!m) return null;
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3])) return null;
+    return d;
+  }
+
+  function calcAge(d: Date): number {
+    const now = new Date();
+    let age = now.getFullYear() - d.getFullYear();
+    const monthDiff = now.getMonth() - d.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < d.getDate())) age--;
+    return age;
+  }
+
   async function submit() {
     setError(null);
     if (!fullName || !email || !phone || !bvn || !password) return setError('All fields are required.');
     if (!/^\d{11}$/.test(bvn)) return setError('BVN must be exactly 11 digits.');
     if (password.length < 8) return setError('Password must be at least 8 characters.');
+    if (!gender) return setError('Please select your sex.');
+    const dob = parseDob(dateOfBirth);
+    if (!dob) return setError('Enter your date of birth as YYYY-MM-DD.');
+    if (calcAge(dob) < 18) return setError('You must be at least 18 years old to register.');
     if (!passportUri) return setError('A passport photograph is required for identity verification.');
 
     setLoading(true);
@@ -47,6 +70,8 @@ export default function RegisterScreen({ navigation }: Props) {
       fd.append('email', email);
       fd.append('phone', phone);
       fd.append('bvn', bvn);
+      fd.append('gender', gender);
+      fd.append('dateOfBirth', dateOfBirth.trim());
       fd.append('password', password);
       // NOTE: the old RN-style `{ uri, name, type }` form part is NOT supported by this
       // Expo SDK's fetch/FormData implementation and throws "Unsupported FormDataPart
@@ -77,6 +102,15 @@ export default function RegisterScreen({ navigation }: Props) {
         <Input label="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
         <Input label="Phone number" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
         <Input label="Bank Verification Number (BVN)" value={bvn} onChangeText={(v) => setBvn(v.replace(/\D/g, ''))} keyboardType="number-pad" maxLength={11} />
+        <GenderToggle value={gender} onChange={setGender} />
+        <Input
+          label="Date of birth (YYYY-MM-DD)"
+          value={dateOfBirth}
+          onChangeText={setDateOfBirth}
+          keyboardType="numbers-and-punctuation"
+          placeholder="e.g. 1998-04-23"
+          maxLength={10}
+        />
         <Input label="Password" value={password} onChangeText={setPassword} secureTextEntry />
 
         <Text style={styles.label}>Passport photograph</Text>
