@@ -36,23 +36,32 @@ export default function TierUpgradeScreen() {
     if (!result.canceled) setter(result.assets[0].uri);
   }
 
+  const movingToTier = profile ? profile.kyc_tier + 1 : null;
+
   async function submit() {
     setError(null);
     setSuccess(null);
-    if (!/^\d{11}$/.test(nin)) return setError('NIN must be exactly 11 digits.');
-    if (!address.trim()) return setError('Address is required.');
-    if (!ninSlipUri) return setError('A photo of your NIN slip is required.');
-    if (!utilityBillUri) return setError('A photo of a recent utility bill is required.');
+
+    if (movingToTier === 2) {
+      if (!/^\d{11}$/.test(nin)) return setError('NIN must be exactly 11 digits.');
+      if (!address.trim()) return setError('Address is required.');
+      if (!ninSlipUri) return setError('A photo of your NIN slip is required.');
+    } else {
+      if (!utilityBillUri) return setError('A photo of a recent utility bill is required.');
+    }
 
     setLoading(true);
     try {
       const fd = new FormData();
-      fd.append('nin', nin);
-      fd.append('address', address);
-      // Same File-append pattern used for the passport upload at registration —
-      // the plain { uri, name, type } object form isn't supported here.
-      fd.append('ninSlip', new File(ninSlipUri), 'nin-slip.jpg');
-      fd.append('utilityBill', new File(utilityBillUri), 'utility-bill.jpg');
+      if (movingToTier === 2) {
+        fd.append('nin', nin);
+        fd.append('address', address);
+        // Same File-append pattern used for the passport upload at registration —
+        // the plain { uri, name, type } object form isn't supported here.
+        fd.append('ninSlip', new File(ninSlipUri!), 'nin-slip.jpg');
+      } else {
+        fd.append('utilityBill', new File(utilityBillUri!), 'utility-bill.jpg');
+      }
 
       const res = await userApi.requestTierUpgrade(fd);
       setSuccess(res.message);
@@ -103,9 +112,13 @@ export default function TierUpgradeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Request a tier upgrade</Text>
+        <Text style={styles.title}>
+          {movingToTier === 2 ? 'Upgrade to Tier 2' : 'Upgrade to Tier 3'}
+        </Text>
         <Text style={styles.subtitle}>
-          Currently Tier {profile.kyc_tier}. Higher tiers unlock larger transaction and loan limits.
+          {movingToTier === 2
+            ? 'Tier 2 unlocks higher limits and needs your NIN plus a photo of your NIN slip.'
+            : 'Tier 3 is our highest limit tier and needs a recent utility bill matching the address on file from your Tier 2 verification.'}
         </Text>
 
         {profile.tier_upgrade_status === 'rejected' && profile.tier_upgrade_notes && (
@@ -114,7 +127,7 @@ export default function TierUpgradeScreen() {
         {error && <Alert type="error">{error}</Alert>}
         {success && <Alert type="success">{success}</Alert>}
 
-        {!success && (
+        {!success && movingToTier === 2 && (
           <>
             <Input
               label="National Identification Number (NIN)"
@@ -131,8 +144,19 @@ export default function TierUpgradeScreen() {
               title={ninSlipUri ? 'Change photo' : 'Attach NIN slip'}
               variant="ghost"
               onPress={() => pickImage(setNinSlipUri)}
-              style={{ marginBottom: spacing.md }}
+              style={{ marginBottom: spacing.lg }}
             />
+
+            <Button title="Submit request" onPress={submit} loading={loading} />
+          </>
+        )}
+
+        {!success && movingToTier === 3 && (
+          <>
+            <View style={styles.addressOnFile}>
+              <Text style={styles.label}>Address on file (from Tier 2)</Text>
+              <Text style={styles.addressText}>{profile.address}</Text>
+            </View>
 
             <Text style={styles.label}>Recent utility bill</Text>
             {utilityBillUri ? <Image source={{ uri: utilityBillUri }} style={styles.preview} /> : null}
@@ -158,4 +182,6 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: fontSizes.base, color: colors.slate, marginTop: 4, marginBottom: spacing.lg },
   label: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.ink, marginBottom: 6 },
   preview: { width: 120, height: 90, borderRadius: 12, marginBottom: spacing.sm },
+  addressOnFile: { backgroundColor: colors.white, borderRadius: 12, padding: spacing.md, marginBottom: spacing.lg },
+  addressText: { fontSize: fontSizes.base, color: colors.slate, marginTop: 2 },
 });

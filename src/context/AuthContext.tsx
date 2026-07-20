@@ -68,17 +68,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // How long the app can sit in the background before we consider it a real
+  // "left the app" event that should re-lock. Anything shorter than this is
+  // almost always the app itself briefly losing foreground focus — opening
+  // the native image/document picker, the camera, an OS permission dialog,
+  // the share sheet, or a phone call/notification banner — NOT the user
+  // switching away. Without this grace period, tapping "Attach NIN slip" or
+  // "Attach utility bill" on the Tier Upgrade screen (which has to hand off
+  // to the OS photo picker) instantly re-locked the app the moment the
+  // picker opened, wiping the in-progress form the second the user came
+  // back and re-entered their PIN. 15s comfortably covers a picker/camera
+  // round-trip while still re-locking promptly for a genuine app switch.
+  const BACKGROUND_LOCK_GRACE_MS = 15000;
+  const backgroundedAt = useRef<number | null>(null);
+
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
       const wasActive = appState.current === 'active';
       const goingBackground = wasActive && next !== 'active';
+      const cameToForeground = appState.current !== 'active' && next === 'active';
       appState.current = next;
 
       if (goingBackground) {
-        // Leaving the app (even briefly) re-locks it — matches "leave the
-        // app, come back, need PIN" rather than just a logout-on-close.
-        unlockedThisForeground.current = false;
-        setSession((prev) => (prev.status === 'unlocked' ? { status: 'locked' } : prev));
+        backgroundedAt.current = Date.now();
+        return;
+      }
+
+      if (cameToForeground) {
+        const awayMs = backgroundedAt.current ? Date.now() - backgroundedAt.current : 0;
+        backgroundedAt.current = null;
+        if (awayMs >= BACKGROUND_LOCK_GRACE_MS) {
+          // Genuinely left the app for a while — matches "leave the app,
+          // come back, need PIN" rather than just a logout-on-close.
+          unlockedThisForeground.current = false;
+          setSession((prev) => (prev.status === 'unlocked' ? { status: 'locked' } : prev));
+        }
       }
     });
     return () => sub.remove();

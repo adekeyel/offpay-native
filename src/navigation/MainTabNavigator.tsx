@@ -6,6 +6,8 @@ import { colors } from '../theme/colors';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import VtuCategoryScreen from '../screens/vtu/VtuCategoryScreen';
+import SendToUserChooserScreen from '../screens/home/SendToUserChooserScreen';
+import SendToWalletScreen from '../screens/home/SendToWalletScreen';
 import SendOfflineScreen from '../screens/home/SendOfflineScreen';
 import ReceiveOfflineScreen from '../screens/home/ReceiveOfflineScreen';
 import BankTransferScreen from '../screens/home/BankTransferScreen';
@@ -29,6 +31,8 @@ import SupportScreen from '../screens/me/SupportScreen';
 export type HomeStackParamList = {
   HomeMain: undefined;
   VtuCategory: { category: 'airtime' | 'data' | 'cable' | 'electricity' };
+  SendToUserChooser: undefined;
+  SendToWallet: undefined;
   SendOffline: undefined;
   ReceiveOffline: undefined;
   BankTransfer: undefined;
@@ -54,6 +58,8 @@ function HomeStack() {
     <HomeStackNav.Navigator screenOptions={{ headerShown: false }}>
       <HomeStackNav.Screen name="HomeMain" component={HomeScreen} />
       <HomeStackNav.Screen name="VtuCategory" component={VtuCategoryScreen} options={{ headerShown: true, title: '' }} />
+      <HomeStackNav.Screen name="SendToUserChooser" component={SendToUserChooserScreen} options={{ headerShown: true, title: 'To OffPay User' }} />
+      <HomeStackNav.Screen name="SendToWallet" component={SendToWalletScreen} options={{ headerShown: true, title: 'Send online' }} />
       <HomeStackNav.Screen name="SendOffline" component={SendOfflineScreen} options={{ headerShown: true, title: 'Send (offline)' }} />
       <HomeStackNav.Screen name="ReceiveOffline" component={ReceiveOfflineScreen} options={{ headerShown: true, title: 'Receive (offline)' }} />
       <HomeStackNav.Screen name="BankTransfer" component={BankTransferScreen} options={{ headerShown: true, title: 'Send to bank' }} />

@@ -105,7 +105,7 @@ export default function HomeScreen({ navigation }: Props) {
 
         <View style={styles.quickActions}>
           <QuickAction icon="🏦" label="To Bank" onPress={() => navigation.navigate('BankTransfer')} />
-          <QuickAction icon="👤" label="To OffPay User" onPress={() => navigation.navigate('SendOffline')} />
+          <QuickAction icon="👤" label="To OffPay User" onPress={() => navigation.navigate('SendToUserChooser')} />
           <QuickAction icon="📥" label="Receive" onPress={() => navigation.navigate('ReceiveOffline')} />
           <QuickAction icon="💳" label="Cards" onPress={() => navigation.getParent()?.navigate('Card' as never)} />
         </View>

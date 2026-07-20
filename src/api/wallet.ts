@@ -11,6 +11,19 @@ export function resolveWallet(walletId: string) {
   );
 }
 
+/**
+ * Sends money instantly to another OffPay user's wallet, online — no QR
+ * code or physical proximity needed (that's the offline flow in
+ * api/offlineTransfer.ts). Settles immediately server-side since both
+ * wallets live in the same database, unlike a bank payout.
+ */
+export function sendToWallet(params: { recipientWalletId: string; amount: number; narration?: string; pin: string }) {
+  return apiFetch<{ success: true; message: string; data: { reference: string; fee: number; amount: number } }>(
+    '/transactions/send-in-app',
+    { method: 'POST', body: params }
+  );
+}
+
 export interface OfflineTokenResult {
   offlineTokenId: string;
   token: string;
