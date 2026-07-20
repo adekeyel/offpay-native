@@ -2,7 +2,7 @@ import { apiFetch, API_URL } from './client';
 import type { WalletSummary, Transaction, VtuProduct, Card } from '../types/api';
 
 export function getWalletSummary() {
-  return apiFetch<{ success: true; data: WalletSummary }>('/wallet/summary');
+  return apiFetch<{ success: true; data: WalletSummary }>('/wallet/summary', { cacheKey: 'wallet-summary' });
 }
 
 export function resolveWallet(walletId: string) {
@@ -35,7 +35,7 @@ export function prepareOfflineMode() {
 }
 
 export function getTransactionHistory(limit = 50) {
-  return apiFetch<{ success: true; data: Transaction[] }>(`/transactions?limit=${limit}`);
+  return apiFetch<{ success: true; data: Transaction[] }>(`/transactions?limit=${limit}`, { cacheKey: `transactions-${limit}` });
 }
 
 export function downloadStatementUrl() {
@@ -54,9 +54,9 @@ export function purchaseVtu(params: { category: string; provider: string; recipi
 }
 
 export function getMyCard() {
-  return apiFetch<{ success: true; data: Card | null }>('/cards/mine');
+  return apiFetch<{ success: true; data: Card | null }>('/cards/mine', { cacheKey: 'my-card' });
 }
-git
+
 export function createCard() {
   return apiFetch<{ success: true; data: Card }>('/cards', { method: 'POST' });
 }

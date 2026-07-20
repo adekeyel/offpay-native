@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as walletApi from '../../api/wallet';
 import { useAuth } from '../../context/AuthContext';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import AdBanner from '../../components/AdBanner';
 import AppHeader from '../../components/AppHeader';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
@@ -21,16 +22,19 @@ const VTU_SHORTCUTS: { category: 'airtime' | 'data' | 'cable' | 'electricity'; l
 
 export default function HomeScreen({ navigation }: Props) {
   const { session } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const user = session.status === 'unlocked' ? session.user : null;
   const [summary, setSummary] = useState<WalletSummary | null>(null);
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showingCached, setShowingCached] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const res = await walletApi.getWalletSummary();
+      const res: any = await walletApi.getWalletSummary();
       setSummary(res.data);
+      setShowingCached(Boolean(res.fromCache));
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Could not load your wallet.');
@@ -77,6 +81,13 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {!isOnline && (
+          <View style={styles.offlineBanner}>
+            <Text style={styles.offlineBannerText}>
+              {showingCached ? "You're offline — showing your last synced data." : "You're offline."}
+            </Text>
+          </View>
+        )}
         {error && <Text style={styles.errorText}>{error}</Text>}
 
         <View style={styles.quickActions}>
@@ -129,6 +140,8 @@ const styles = StyleSheet.create({
   addMoneyBtn: { backgroundColor: colors.white, borderRadius: radius.pill, paddingVertical: 7, paddingHorizontal: 14 },
   addMoneyText: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.ink },
   errorText: { color: colors.danger, marginHorizontal: spacing.lg, fontSize: fontSizes.sm },
+  offlineBanner: { marginHorizontal: spacing.lg, marginBottom: spacing.sm, backgroundColor: colors.lockDim, borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 12 },
+  offlineBannerText: { color: colors.ink700, fontSize: fontSizes.xs, fontWeight: '600' },
   quickActions: { flexDirection: 'row', paddingHorizontal: spacing.lg, justifyContent: 'space-between' },
   section: { marginTop: spacing.lg, backgroundColor: colors.white, marginHorizontal: spacing.lg, borderRadius: radius.lg, padding: spacing.lg },
   sectionTitle: { fontSize: fontSizes.md, fontWeight: '700', color: colors.ink, marginBottom: spacing.md },

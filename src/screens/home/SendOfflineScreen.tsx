@@ -13,6 +13,7 @@ import { hasLocalPin } from '../../auth/localAuth';
 import * as offlineTransferApi from '../../api/offlineTransfer';
 import * as walletApi from '../../api/wallet';
 import { addToOutbox, removeFromOutbox } from '../../offline/voucherOutbox';
+import { applyOptimisticOfflineDebit, prependOptimisticTransaction } from '../../offline/walletCache';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { SignedVoucher } from '../../api/offlineTransfer';
 
@@ -148,6 +149,17 @@ export default function SendOfflineScreen() {
       // if the app crashes or closes right now, this transfer is not lost.
       const deviceId = await getOrCreateDeviceId();
       await addToOutbox({ voucher: signed, deviceId, receiverName: receiver.fullName, createdAt: Date.now() });
+
+      // Reflect the spend right away in what Home/History show, rather than
+      // leaving the balance looking untouched until the next successful
+      // network fetch (which may not happen until back online).
+      await applyOptimisticOfflineDebit(amt);
+      await prependOptimisticTransaction({
+        id: signed.nonce,
+        amount: amt,
+        narration: `Sent to ${receiver.fullName} (offline)`,
+        direction: 'debit',
+      });
     } catch (err: any) {
       setStatus({ type: 'error', text: err.message || 'Could not sign the transfer on this device.' });
       setStep('amount');
@@ -167,6 +179,10 @@ export default function SendOfflineScreen() {
         await removeFromOutbox(voucher.nonce);
         setStatus({ type: 'success', text: 'Transfer confirmed — money has moved.' });
         setStep('done');
+        // Replace the optimistic estimate with the real, server-confirmed
+        // balance and transaction record now that we have connectivity.
+        walletApi.getWalletSummary().catch(() => {});
+        walletApi.getTransactionHistory().catch(() => {});
       } else {
         setStatus({ type: 'error', text: res.message });
       }

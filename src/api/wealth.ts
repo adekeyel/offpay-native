@@ -2,11 +2,11 @@ import { apiFetch } from './client';
 import type { WealthProduct, WealthAccount } from '../types/api';
 
 export function getWealthProducts() {
-  return apiFetch<{ success: true; data: WealthProduct[] }>('/wealth/products');
+  return apiFetch<{ success: true; data: WealthProduct[] }>('/wealth/products', { cacheKey: 'wealth-products' });
 }
 
 export function getMyWealthAccounts() {
-  return apiFetch<{ success: true; data: WealthAccount[] }>('/wealth/accounts');
+  return apiFetch<{ success: true; data: WealthAccount[] }>('/wealth/accounts', { cacheKey: 'wealth-accounts' });
 }
 
 export function openWealthAccount(params: {

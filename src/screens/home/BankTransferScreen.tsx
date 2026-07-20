@@ -6,11 +6,13 @@ import Alert from '../../components/Alert';
 import PinInput from '../../components/PinInput';
 import * as bankApi from '../../api/bank';
 import type { Bank } from '../../api/bank';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 
 type Step = 'details' | 'confirm' | 'done';
 
 export default function BankTransferScreen() {
+  const { isOnline } = useNetworkStatus();
   const [step, setStep] = useState<Step>('details');
   const [banks, setBanks] = useState<Bank[]>([]);
   const [bankPickerOpen, setBankPickerOpen] = useState(false);
@@ -26,8 +28,9 @@ export default function BankTransferScreen() {
   const [result, setResult] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
+    if (!isOnline) return;
     bankApi.listBanks().then((res) => setBanks(res.data)).catch(() => setError('Could not load bank list.'));
-  }, []);
+  }, [isOnline]);
 
   useEffect(() => {
     setAccountName(null);
@@ -103,6 +106,21 @@ export default function BankTransferScreen() {
           <Pressable onPress={() => setStep('details')} style={{ marginTop: spacing.lg }}>
             <Text style={styles.link}>Go back and edit</Text>
           </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!isOnline) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.centered}>
+          <Text style={styles.title}>Connect to send to a bank</Text>
+          <Text style={styles.subtitle}>
+            Sending to an external bank account needs an internet connection. You can still send
+            or receive money with other OffPay users while offline — go to Home → To OffPay User
+            or Receive.
+          </Text>
         </View>
       </SafeAreaView>
     );

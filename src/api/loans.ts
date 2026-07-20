@@ -2,11 +2,11 @@ import { apiFetch } from './client';
 import type { LoanProduct, Loan } from '../types/api';
 
 export function getLoanProducts() {
-  return apiFetch<{ success: true; data: LoanProduct[] }>('/loans/products');
+  return apiFetch<{ success: true; data: LoanProduct[] }>('/loans/products', { cacheKey: 'loan-products' });
 }
 
 export function getActiveLoan() {
-  return apiFetch<{ success: true; data: Loan | null }>('/loans/active');
+  return apiFetch<{ success: true; data: Loan | null }>('/loans/active', { cacheKey: 'active-loan' });
 }
 
 export function requestLoan(loanProductId: string, amount: number) {

@@ -42,5 +42,5 @@ export function syncVoucher(voucher: SignedVoucher, deviceId: string) {
 }
 
 export function getOfflineTransferHistory() {
-  return apiFetch<{ success: true; data: OfflineVoucher[] }>('/transfers/offline/history');
+  return apiFetch<{ success: true; data: OfflineVoucher[] }>('/transfers/offline/history', { cacheKey: 'offline-transfer-history' });
 }

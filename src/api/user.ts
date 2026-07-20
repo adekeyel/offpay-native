@@ -2,7 +2,7 @@ import { apiFetch } from './client';
 import type { UserProfile } from '../types/api';
 
 export function getProfile() {
-  return apiFetch<{ success: true; data: UserProfile }>('/users/me');
+  return apiFetch<{ success: true; data: UserProfile }>('/users/me', { cacheKey: 'profile' });
 }
 
 export function setTransactionPin(pin: string, currentPassword: string) {
