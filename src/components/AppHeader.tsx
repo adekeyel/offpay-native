@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, StatusBar } from 'react-native';
 import { colors, spacing, fontSizes, radius } from '../theme/colors';
 
 interface AppHeaderProps {
@@ -39,7 +39,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    // react-native's own <SafeAreaView> only accounts for the status bar on
+    // iOS — on Android it's a no-op, so without this the header renders
+    // right against (sometimes under) the status bar. StatusBar.currentHeight
+    // is core React Native, so this needs no extra native dependency/rebuild.
+    paddingTop: (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0) + spacing.md,
     paddingBottom: spacing.xs,
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },

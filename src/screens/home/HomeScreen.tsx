@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as walletApi from '../../api/wallet';
 import { useAuth } from '../../context/AuthContext';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
+import { setCachedOfflineToken } from '../../auth/secureStorage';
 import AdBanner from '../../components/AdBanner';
 import AppHeader from '../../components/AppHeader';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
@@ -36,6 +37,18 @@ export default function HomeScreen({ navigation }: Props) {
       setSummary(res.data);
       setShowingCached(Boolean(res.fromCache));
       setError(null);
+      if (!res.fromCache) {
+        // We're genuinely online right now (this wasn't served from cache) —
+        // opportunistically refresh the offline-spend token in the
+        // background so "Send (offline)" doesn't ask the user to connect
+        // the moment they open it after losing signal. Best-effort: if it
+        // fails (e.g. KYC not approved yet), Send (offline) still has its
+        // own fallback logic.
+        walletApi
+          .prepareOfflineMode()
+          .then((r) => setCachedOfflineToken({ token: r.data.token, offlineLimit: r.data.offlineLimit, expiresAt: r.data.expiresAt }))
+          .catch(() => {});
+      }
     } catch (err: any) {
       setError(err.message || 'Could not load your wallet.');
     }
