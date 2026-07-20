@@ -7,6 +7,7 @@ import {
   getCachedUser, setCachedUser,
 } from '../auth/secureStorage';
 import { setLocalPin, verifyLocalPin, hasLocalPin, type PinVerifyResult } from '../auth/localAuth';
+import { isPickerSessionActive } from '../utils/pickerSession';
 import type { User } from '../types/api';
 
 type SessionState =
@@ -97,6 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (cameToForeground) {
         const awayMs = backgroundedAt.current ? Date.now() - backgroundedAt.current : 0;
         backgroundedAt.current = null;
+        if (isPickerSessionActive()) {
+          // A native picker (photo library, camera, document picker) is
+          // still open or just closed — never lock mid-picker no matter
+          // how long the user spent browsing albums.
+          return;
+        }
         if (awayMs >= BACKGROUND_LOCK_GRACE_MS) {
           // Genuinely left the app for a while — matches "leave the app,
           // come back, need PIN" rather than just a logout-on-close.

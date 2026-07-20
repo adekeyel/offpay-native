@@ -27,6 +27,7 @@ import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
 import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
 import TierUpgradeScreen from '../screens/me/TierUpgradeScreen';
 import SupportScreen from '../screens/me/SupportScreen';
+import SupportTicketThreadScreen from '../screens/me/SupportTicketThreadScreen';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -50,6 +51,7 @@ export type MeStackParamList = {
   SettingsSecurity: undefined;
   TierUpgrade: undefined;
   Support: undefined;
+  SupportTicketThread: { ticketId: string };
 };
 
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
@@ -107,6 +109,7 @@ function MeStack() {
       <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />
       <MeStackNav.Screen name="TierUpgrade" component={TierUpgradeScreen} options={{ headerShown: true, title: 'Upgrade Tier' }} />
       <MeStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: true, title: 'Support' }} />
+      <MeStackNav.Screen name="SupportTicketThread" component={SupportTicketThreadScreen} options={{ headerShown: true, title: 'Conversation' }} />
     </MeStackNav.Navigator>
   );
 }

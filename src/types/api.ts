@@ -177,6 +177,16 @@ export interface SupportTicket {
   assigned_to: string | null;
   created_at: string;
   updated_at: string;
+  last_reply_message?: string | null;
+  last_reply_author_type?: 'user' | 'admin' | null;
+  last_reply_at?: string | null;
+}
+
+export interface SupportReply {
+  id: string;
+  author_type: 'user' | 'admin';
+  message: string;
+  created_at: string;
 }
 
 export interface ApiErrorShape {

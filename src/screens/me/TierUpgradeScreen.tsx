@@ -7,6 +7,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import * as userApi from '../../api/user';
+import { withPickerSession } from '../../utils/pickerSession';
 import { colors, spacing, fontSizes } from '../../theme/colors';
 import type { UserProfile } from '../../types/api';
 
@@ -32,7 +33,9 @@ export default function TierUpgradeScreen() {
       setError('Photo library access is needed to attach this document.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 });
+    const result = await withPickerSession(() =>
+      ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.7 })
+    );
     if (!result.canceled) setter(result.assets[0].uri);
   }
 
