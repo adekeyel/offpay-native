@@ -70,7 +70,7 @@ export default function RegisterScreen({ navigation }: Props) {
       fd.append('email', email);
       fd.append('phone', phone);
       fd.append('bvn', bvn);
-      fd.append('gender', gender);
+      fd.append('sex', gender);
       fd.append('dateOfBirth', dateOfBirth.trim());
       fd.append('password', password);
       // NOTE: the old RN-style `{ uri, name, type }` form part is NOT supported by this
