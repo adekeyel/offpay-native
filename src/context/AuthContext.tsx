@@ -118,18 +118,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithPassword = useCallback(async (email: string, password: string, deviceId: string) => {
     // Logging in for the first time on a device inherently needs the
     // server — there's nothing local yet to check the password against.
-    // Once this succeeds we cache the user and (once a PIN exists) unlock
-    // stays fully offline from then on.
     const res = await authApi.login(email, password, deviceId);
     await setRefreshToken(res.data.refreshToken);
     await setCachedUser(res.data.user);
     setAccessToken(res.data.accessToken);
+
+    if (!res.data.appLockPinSet) {
+      unlockedThisForeground.current = true;
+      setSession({ status: 'needs-pin-setup', user: res.data.user });
+      return;
+    }
+
+    // The server already has a PIN for this account, but that doesn't mean
+    // THIS device has ever had it typed in — a fresh install, or a device
+    // that's never been through one online unlock cycle, has no local PIN
+    // hash yet (see localAuth.ts). Going straight to 'unlocked' here would
+    // leave this device with no way to check the PIN offline until it
+    // happened to background-and-reopen the app while still online — which,
+    // if it never does before losing signal, means offline unlock never
+    // works at all. Instead, route through the lock screen once right now,
+    // while we still definitely have network from the login call that just
+    // succeeded — that one PIN entry plants the local hash (via
+    // unlockWithPin's migration path below) and every unlock after this
+    // works fully offline.
+    const localHashExists = await hasLocalPin('lock');
+    if (!localHashExists) {
+      setSession({ status: 'locked' });
+      return;
+    }
+
     unlockedThisForeground.current = true;
-    setSession(
-      res.data.appLockPinSet
-        ? { status: 'unlocked', user: res.data.user }
-        : { status: 'needs-pin-setup', user: res.data.user }
-    );
+    setSession({ status: 'unlocked', user: res.data.user });
   }, []);
 
   const completeRegistrationLogin = useCallback(async (accessToken: string, refreshToken: string, user: User, appLockPinSet: boolean) => {
