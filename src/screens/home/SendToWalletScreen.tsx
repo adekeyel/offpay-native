@@ -4,6 +4,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import PinInput from '../../components/PinInput';
+import AppFooter from '../../components/AppFooter';
 import * as walletApi from '../../api/wallet';
 import * as securityApi from '../../api/security';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
@@ -118,6 +119,7 @@ export default function SendToWalletScreen() {
           <Text style={styles.title}>Transfer sent</Text>
           <Text style={styles.subtitle}>{result?.message}</Text>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -148,6 +150,7 @@ export default function SendToWalletScreen() {
             <Text style={styles.link}>Go back</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -169,6 +172,7 @@ export default function SendToWalletScreen() {
             <Text style={styles.link}>Go back and edit</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -183,6 +187,7 @@ export default function SendToWalletScreen() {
             Home → To OffPay User → Send nearby (offline) instead — it works fully offline via QR code.
           </Text>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -212,6 +217,7 @@ export default function SendToWalletScreen() {
 
         <Button title="Continue" onPress={proceedToConfirm} disabled={!recipientName || resolving} />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

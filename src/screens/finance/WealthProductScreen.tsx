@@ -10,6 +10,7 @@ import * as wealthApi from '../../api/wealth';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { FinanceStackParamList } from '../../navigation/MainTabNavigator';
 import type { WealthProduct, WealthAccount } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 type Props = NativeStackScreenProps<FinanceStackParamList, 'WealthProduct'>;
 
@@ -130,6 +131,7 @@ export default function WealthProductScreen({ route, navigation }: Props) {
           </View>
         )}
         <AdBanner page="wealth-product" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

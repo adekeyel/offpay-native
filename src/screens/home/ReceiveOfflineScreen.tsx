@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import * as offlineTransferApi from '../../api/offlineTransfer';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { OfflineVoucher } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 /**
  * Shows this user's own ID as a QR code — deliberately requires NO network
@@ -58,6 +59,7 @@ export default function ReceiveOfflineScreen() {
           </View>
         )}
         <AdBanner page="receive-offline" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

@@ -10,6 +10,7 @@ import * as walletApi from '../../api/wallet';
 import { colors, spacing, fontSizes } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/MainTabNavigator';
 import type { VtuProduct } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'VtuCategory'>;
 
@@ -94,6 +95,7 @@ export default function VtuCategoryScreen({ route, navigation }: Props) {
         {status && <Alert type={status.type}>{status.text}</Alert>}
         <Button title="Pay" onPress={submit} loading={loading} />
         <AdBanner page="vtu-category" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import * as authApi from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -48,6 +49,7 @@ export default function VerifyOtpScreen({ route }: Props) {
         <Input label="Verification code" value={code} onChangeText={(v) => setCode(v.replace(/\D/g, ''))} keyboardType="number-pad" maxLength={6} />
         <Button title="Verify" onPress={submit} loading={loading} />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

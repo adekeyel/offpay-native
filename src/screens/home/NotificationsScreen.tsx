@@ -6,6 +6,7 @@ import * as notificationsApi from '../../api/notifications';
 import type { UserNotification } from '../../api/notifications';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/MainTabNavigator';
+import AppFooter from '../../components/AppFooter';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Notifications'>;
 
@@ -93,6 +94,7 @@ export default function NotificationsScreen({ navigation }: Props) {
             </Pressable>
           );
         })}
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

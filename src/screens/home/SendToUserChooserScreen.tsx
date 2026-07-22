@@ -1,4 +1,5 @@
 import AdBanner from '../../components/AdBanner';
+import AppFooter from '../../components/AppFooter';
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -33,6 +34,7 @@ export default function SendToUserChooserScreen({ navigation }: Props) {
         </Pressable>
         <AdBanner page="send-to-user" position="bottom" />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

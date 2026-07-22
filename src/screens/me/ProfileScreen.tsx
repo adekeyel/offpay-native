@@ -8,6 +8,7 @@ import * as walletApi from '../../api/wallet';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { MeStackParamList } from '../../navigation/MainTabNavigator';
 import type { UserProfile, WalletSummary } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 type Props = NativeStackScreenProps<MeStackParamList, 'Profile'>;
 
@@ -91,6 +92,7 @@ export default function ProfileScreen({ navigation }: Props) {
           />
         </View>
         <AdBanner page="profile" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

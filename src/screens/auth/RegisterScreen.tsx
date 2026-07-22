@@ -7,6 +7,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import GenderToggle from '../../components/GenderToggle';
+import AppFooter from '../../components/AppFooter';
 import * as authApi from '../../api/auth';
 import { getOrCreateDeviceId } from '../../auth/secureStorage';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -122,6 +123,7 @@ export default function RegisterScreen({ navigation }: Props) {
         {passportUri && <Button title="Retake photo" variant="ghost" onPress={pickPassportPhoto} style={{ marginBottom: spacing.md }} />}
 
         <Button title="Create account" onPress={submit} loading={loading} />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

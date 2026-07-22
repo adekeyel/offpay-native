@@ -6,6 +6,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import * as userApi from '../../api/user';
 import { withPickerSession } from '../../utils/pickerSession';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -86,6 +87,7 @@ export default function TierUpgradeScreen() {
             account shows as verified, come back here to request a higher tier.
           </Alert>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -96,6 +98,7 @@ export default function TierUpgradeScreen() {
         <View style={styles.content}>
           <Alert type="success">You're already at the highest verification tier.</Alert>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -108,6 +111,7 @@ export default function TierUpgradeScreen() {
             Your tier upgrade request is pending review. This is usually reviewed within 24-48 hours.
           </Alert>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -173,6 +177,7 @@ export default function TierUpgradeScreen() {
             <Button title="Submit request" onPress={submit} loading={loading} />
           </>
         )}
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

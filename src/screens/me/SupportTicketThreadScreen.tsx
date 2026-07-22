@@ -1,4 +1,5 @@
 import AdBanner from '../../components/AdBanner';
+import AppFooter from '../../components/AppFooter';
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -79,6 +80,7 @@ export default function SupportTicketThreadScreen({ route }: Props) {
             <Text style={[styles.bubbleText, m.author_type === 'admin' && styles.bubbleTextAdmin]}>{m.message}</Text>
           </View>
         ))}
+        <AppFooter />
       </ScrollView>
 
       <View style={styles.replyBar}>

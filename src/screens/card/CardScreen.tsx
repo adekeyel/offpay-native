@@ -7,6 +7,7 @@ import Alert from '../../components/Alert';
 import * as walletApi from '../../api/wallet';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { Card } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 const STATUS_LABEL: Record<string, string> = { active: 'Active', frozen: 'Frozen', blocked: 'Blocked', expired: 'Expired' };
 
@@ -101,6 +102,7 @@ export default function CardScreen() {
           </View>
         )}
         <AdBanner page="card" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

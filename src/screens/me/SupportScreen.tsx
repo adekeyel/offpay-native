@@ -10,6 +10,7 @@ import * as supportApi from '../../api/support';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { SupportTicket } from '../../types/api';
 import type { MeStackParamList } from '../../navigation/MainTabNavigator';
+import AppFooter from '../../components/AppFooter';
 
 type Props = NativeStackScreenProps<MeStackParamList, 'Support'>;
 
@@ -92,6 +93,7 @@ export default function SupportScreen({ navigation }: Props) {
           </>
         )}
         <AdBanner page="support" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

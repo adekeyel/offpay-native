@@ -7,6 +7,7 @@ import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { WalletSummary } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 export default function AddMoneyScreen() {
   const [summary, setSummary] = useState<WalletSummary | null>(null);
@@ -60,6 +61,7 @@ export default function AddMoneyScreen() {
           </>
         )}
         <AdBanner page="add-money" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

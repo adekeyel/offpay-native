@@ -6,6 +6,7 @@ import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import Input from '../../components/Input';
 import AdBanner from '../../components/AdBanner';
+import AppFooter from '../../components/AppFooter';
 import * as loanApi from '../../api/loans';
 import * as wealthApi from '../../api/wealth';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
@@ -35,6 +36,7 @@ export default function FinanceScreen({ navigation }: Props) {
       <AdBanner page="finance" position="middle" />
       {subTab === 'loan' ? <LoanTab /> : <WealthTab navigation={navigation} />}
       <AdBanner page="finance" position="bottom" />
+      <AppFooter />
     </SafeAreaView>
   );
 }

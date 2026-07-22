@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import PinInput from '../../components/PinInput';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, fontSizes } from '../../theme/colors';
 
@@ -38,6 +39,7 @@ export default function UnlockScreen() {
           <Text style={styles.link}>Not you? Log in with a different account</Text>
         </Pressable>
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

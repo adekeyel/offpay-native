@@ -8,6 +8,7 @@ import type { SecuritySettings } from '../../api/security';
 import { setLocalPin } from '../../auth/localAuth';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
+import AppFooter from '../../components/AppFooter';
 
 type SectionKey = 'password' | 'pin' | 'lock' | null;
 
@@ -59,6 +60,7 @@ export default function SettingsSecurityScreen() {
           <AppLockPinForm onDone={() => setOpenSection(null)} />
         </Section>
         <AdBanner page="settings-security" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

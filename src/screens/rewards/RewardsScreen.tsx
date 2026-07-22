@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as rewardsApi from '../../api/rewards';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { RewardsSummary } from '../../types/api';
+import AppFooter from '../../components/AppFooter';
 
 export default function RewardsScreen() {
   const [summary, setSummary] = useState<RewardsSummary | null>(null);
@@ -47,6 +48,7 @@ export default function RewardsScreen() {
           <Text style={styles.statNote}>These aren't built yet — only cashback above is real.</Text>
         </View>
         <AdBanner page="rewards" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

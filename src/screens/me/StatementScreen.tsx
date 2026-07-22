@@ -5,6 +5,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import { downloadStatementUrl } from '../../api/wallet';
 import { getAccessToken } from '../../api/client';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -50,6 +51,7 @@ export default function StatementScreen() {
         <Button title="Download statement" onPress={download} loading={loading} />
         <AdBanner page="statement" position="bottom" />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

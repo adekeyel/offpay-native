@@ -6,6 +6,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import PinInput from '../../components/PinInput';
+import AppFooter from '../../components/AppFooter';
 import { useAuth, formatLockoutMessage } from '../../context/AuthContext';
 import { getOrCreateDeviceId, getCachedOfflineToken, setCachedOfflineToken } from '../../auth/secureStorage';
 import { getOrCreateKeypair } from '../../auth/deviceKey';
@@ -201,6 +202,7 @@ export default function SendOfflineScreen() {
         <View style={styles.centered}>
           <ActivityIndicator color={colors.ink} />
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -216,6 +218,7 @@ export default function SendOfflineScreen() {
             your spending limit — then it'll keep working even after you lose signal.
           </Text>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -229,6 +232,7 @@ export default function SendOfflineScreen() {
             <Text style={styles.subtitle}>Camera access is needed to scan the receiver's code.</Text>
             <Button title="Grant camera access" onPress={requestPermission} style={{ marginTop: spacing.md }} />
           </View>
+          <AppFooter />
         </SafeAreaView>
       );
     }
@@ -273,6 +277,7 @@ export default function SendOfflineScreen() {
             <Text style={styles.link}>Scan their QR code instead</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -295,6 +300,7 @@ export default function SendOfflineScreen() {
           <Input label="Amount (₦)" value={amount} onChangeText={(v) => setAmount(v.replace(/[^0-9.]/g, ''))} keyboardType="numeric" autoFocus />
           <Button title="Continue" onPress={proceedToPin} disabled={txnPinReady !== 'ready'} />
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -314,6 +320,7 @@ export default function SendOfflineScreen() {
             <Text style={styles.link}>Back</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -338,6 +345,7 @@ export default function SendOfflineScreen() {
             <Text style={styles.link}>I'll sync later from Home</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -352,6 +360,7 @@ export default function SendOfflineScreen() {
             : "This transfer is saved on your device and will sync once you're back online."}
         </Text>
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import { useAuth } from '../../context/AuthContext';
 import { getOrCreateDeviceId } from '../../auth/secureStorage';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -49,6 +50,7 @@ export default function LoginScreen({}: Props) {
 
         <Button title="Continue" onPress={submit} loading={loading} />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

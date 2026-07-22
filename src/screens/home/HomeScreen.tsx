@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { setCachedOfflineToken } from '../../auth/secureStorage';
 import AdBanner from '../../components/AdBanner';
+import AppFooter from '../../components/AppFooter';
 import AppHeader from '../../components/AppHeader';
 import NotificationBell from '../../components/NotificationBell';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
@@ -136,6 +137,7 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </View>
         <AdBanner page="dashboard" position="bottom" />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

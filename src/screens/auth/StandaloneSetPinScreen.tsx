@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import PinInput from '../../components/PinInput';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import * as authApi from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, fontSizes } from '../../theme/colors';
@@ -55,6 +56,7 @@ export default function StandaloneSetPinScreen({ user }: { user: User }) {
           disabled={loading}
         />
       </View>
+      <AppFooter />
     </SafeAreaView>
   );
 }

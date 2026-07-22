@@ -5,6 +5,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
+import AppFooter from '../../components/AppFooter';
 import { receiptUrl } from '../../api/wallet';
 import { getAccessToken } from '../../api/client';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
@@ -101,14 +102,13 @@ export default function TransactionDetailScreen({ route }: Props) {
           <DetailRow label="Date & time" value={new Date(txn.created_at).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'medium' })} />
           <DetailRow label="Amount" value={fmtMoney(txn.amount)} />
           <DetailRow label="Fee" value={fmtMoney(txn.fee)} />
-          <DetailRow label="Balance before" value={fmtMoney(txn.balance_before)} />
-          <DetailRow label="Balance after" value={fmtMoney(txn.balance_after)} />
           {txn.provider && <DetailRow label="Processed via" value={txn.provider} />}
           {txn.narration && <DetailRow label="Narration" value={txn.narration} />}
         </View>
 
         {status && <Alert type={status.type}>{status.text}</Alert>}
         <Button title="Share receipt" onPress={shareReceipt} loading={sharing} style={{ marginTop: spacing.md }} />
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

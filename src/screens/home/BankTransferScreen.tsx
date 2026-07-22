@@ -4,6 +4,7 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
 import PinInput from '../../components/PinInput';
+import AppFooter from '../../components/AppFooter';
 import * as bankApi from '../../api/bank';
 import type { Bank } from '../../api/bank';
 import * as securityApi from '../../api/security';
@@ -131,6 +132,7 @@ export default function BankTransferScreen() {
           <Text style={styles.title}>Transfer sent</Text>
           <Text style={styles.subtitle}>{result?.message}</Text>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -161,6 +163,7 @@ export default function BankTransferScreen() {
             <Text style={styles.link}>Go back</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -183,6 +186,7 @@ export default function BankTransferScreen() {
             <Text style={styles.link}>Go back and edit</Text>
           </Pressable>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -198,6 +202,7 @@ export default function BankTransferScreen() {
             or Receive.
           </Text>
         </View>
+        <AppFooter />
       </SafeAreaView>
     );
   }
@@ -252,6 +257,7 @@ export default function BankTransferScreen() {
           />
         </SafeAreaView>
       </Modal>
+      <AppFooter />
     </SafeAreaView>
   );
 }
