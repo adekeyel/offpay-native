@@ -27,7 +27,7 @@ export default function AddMoneyScreen() {
   async function shareDetails() {
     if (!summary?.accountNumber) return;
     await Share.share({
-      message: `Send money to my OffPay account:\n\nBank: ${summary.bankName}\nAccount Number: ${summary.accountNumber}`,
+      message: `Send money to my OffPay account:\n\nBank: ${summary.bankName}\nAccount Number: ${summary.accountNumber}\nAccount Name: ${summary.accountName ?? 'OffPay'}`,
     });
   }
 
@@ -50,7 +50,7 @@ export default function AddMoneyScreen() {
             <View style={styles.card}>
               <Row label="Bank" value={summary.bankName ?? ''} />
               <Row label="Account Number" value={summary.accountNumber} big />
-              <Row label="Account Name" value="OffPay" />
+              <Row label="Account Name" value={summary.accountName ?? 'OffPay'} />
             </View>
             <Text style={styles.note}>
               Deposits are credited automatically, usually within a minute of the transfer being confirmed by your

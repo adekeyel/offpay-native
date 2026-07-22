@@ -16,6 +16,7 @@ export interface LoginResponse {
 export interface WalletSummary {
   walletId: string;
   accountNumber: string | null;
+  accountName: string | null;
   bankName: string | null;
   balance: number;
   confirmed: number;
