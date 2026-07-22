@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform, StatusBar, Image } from 'react-native';
 import { colors, spacing, fontSizes, radius } from '../theme/colors';
 
 interface AppHeaderProps {
@@ -21,9 +21,7 @@ export default function AppHeader({ right, dark, onPress }: AppHeaderProps) {
   return (
     <View style={styles.row}>
       <Wrapper style={styles.brand} onPress={onPress} hitSlop={8}>
-        <View style={styles.mark}>
-          <Text style={styles.markText}>O</Text>
-        </View>
+        <Image source={require('../../assets/logo.png')} style={styles.mark} resizeMode="contain" />
         <Text style={[styles.wordmark, dark && styles.wordmarkDark]}>
           Off<Text style={{ color: colors.unlock }}>Pay</Text>
         </Text>
@@ -47,11 +45,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  mark: {
-    width: 26, height: 26, borderRadius: radius.sm,
-    backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center',
-  },
-  markText: { color: colors.unlock, fontWeight: '800', fontSize: 14 },
+  mark: { width: 26, height: 26, borderRadius: radius.sm },
   wordmark: { fontSize: fontSizes.md, fontWeight: '800', color: colors.ink },
   wordmarkDark: { color: colors.white },
 });

@@ -7,7 +7,10 @@
     "icon": "./assets/icon.png",
     "scheme": "offpay",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#F3F5F4",
+    "splash": {
+      "image": "./assets/icon.png",
+    // "backgroundColor": "#F3F5F4",
+     "backgroundColor": "#0E2230",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.offpay.mobile",
@@ -19,10 +22,10 @@
     "android": {
       "package": "app.offpay.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#0E2230",
+        "foregroundImage": "./assets/logo.png",
+        "backgroundImage": "./assets/logo.png",
+        "monochromeImage": "./assets/logo.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [

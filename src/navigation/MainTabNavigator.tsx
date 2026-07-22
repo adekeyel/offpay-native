@@ -29,6 +29,10 @@ import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
 import TierUpgradeScreen from '../screens/me/TierUpgradeScreen';
 import SupportScreen from '../screens/me/SupportScreen';
 import SupportTicketThreadScreen from '../screens/me/SupportTicketThreadScreen';
+import AboutScreen from '../screens/legal/AboutScreen';
+import TermsScreen from '../screens/legal/TermsScreen';
+import PrivacyPolicyScreen from '../screens/legal/PrivacyPolicyScreen';
+import ComplianceScreen from '../screens/legal/ComplianceScreen';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -54,6 +58,10 @@ export type MeStackParamList = {
   TierUpgrade: undefined;
   Support: undefined;
   SupportTicketThread: { ticketId: string };
+  About: undefined;
+  Terms: undefined;
+  PrivacyPolicy: undefined;
+  Compliance: undefined;
 };
 
 const HomeStackNav = createNativeStackNavigator<HomeStackParamList>();
@@ -113,6 +121,10 @@ function MeStack() {
       <MeStackNav.Screen name="TierUpgrade" component={TierUpgradeScreen} options={{ headerShown: true, title: 'Upgrade Tier' }} />
       <MeStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: true, title: 'Support' }} />
       <MeStackNav.Screen name="SupportTicketThread" component={SupportTicketThreadScreen} options={{ headerShown: true, title: 'Conversation' }} />
+      <MeStackNav.Screen name="About" component={AboutScreen} options={{ headerShown: true, title: 'About OffPay' }} />
+      <MeStackNav.Screen name="Terms" component={TermsScreen} options={{ headerShown: true, title: 'Terms of Service' }} />
+      <MeStackNav.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ headerShown: true, title: 'Privacy Policy' }} />
+      <MeStackNav.Screen name="Compliance" component={ComplianceScreen} options={{ headerShown: true, title: 'Regulatory & Complaints' }} />
     </MeStackNav.Navigator>
   );
 }

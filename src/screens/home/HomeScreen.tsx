@@ -68,7 +68,20 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={{ paddingBottom: spacing.xxl }}>
-        <AppHeader right={<NotificationBell onPress={() => navigation.navigate('Notifications')} />} />
+        <AppHeader
+          right={
+            <View style={styles.headerActions}>
+              <Pressable
+                hitSlop={10}
+                style={styles.headerIconBtn}
+                onPress={() => navigation.getParent()?.navigate('Me' as never, { screen: 'SettingsSecurity' } as never)}
+              >
+                <Text style={styles.headerIcon}>⚙️</Text>
+              </Pressable>
+              <NotificationBell onPress={() => navigation.navigate('Notifications')} />
+            </View>
+          }
+        />
         <AdBanner page="dashboard" position="top" />
         <View style={styles.header}>
           <Text style={styles.greeting}>Good day,</Text>
@@ -139,6 +152,9 @@ function QuickAction({ icon, label, onPress }: { icon: string; label: string; on
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.paper },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  headerIconBtn: { padding: 4 },
+  headerIcon: { fontSize: 18 },
   header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   greeting: { fontSize: fontSizes.xs, color: 'rgba(0,0,0,0.5)' },
   username: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.ink, marginTop: 2 },

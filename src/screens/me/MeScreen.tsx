@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import * as userApi from '../../api/user';
 import AppHeader from '../../components/AppHeader';
+import AppFooter from '../../components/AppFooter';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import type { MeStackParamList } from '../../navigation/MainTabNavigator';
 import type { UserProfile } from '../../types/api';
@@ -29,7 +30,7 @@ export default function MeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <AppHeader right={<Pressable hitSlop={8}><Text style={{ fontSize: 20 }}>⚙️</Text></Pressable>} />
+        <AppHeader right={<Pressable hitSlop={8} onPress={() => navigation.navigate('SettingsSecurity')}><Text style={{ fontSize: 20 }}>⚙️</Text></Pressable>} />
         <AdBanner page="me" position="top" />
 
         <Pressable style={styles.profileHeader} onPress={() => navigation.navigate('Profile')}>
@@ -83,6 +84,16 @@ export default function MeScreen({ navigation }: Props) {
           <MenuRow icon="💬" label="Support" onPress={() => navigation.navigate('Support')} />
           <MenuRow icon="↪" label="Log out" onPress={logout} danger />
         </View>
+
+        <Text style={styles.groupLabel}>Legal & info</Text>
+        <View style={styles.menuList}>
+          <MenuRow icon="ℹ️" label="About OffPay" onPress={() => navigation.navigate('About')} />
+          <MenuRow icon="📃" label="Terms of Service" onPress={() => navigation.navigate('Terms')} />
+          <MenuRow icon="🛡️" label="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
+          <MenuRow icon="⚖️" label="Regulatory & Complaints" onPress={() => navigation.navigate('Compliance')} />
+        </View>
+
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );
@@ -138,6 +149,7 @@ const styles = StyleSheet.create({
   infoLabel: { fontSize: fontSizes.sm, color: colors.slate },
   infoValue: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.ink },
   menuList: { backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden', marginHorizontal: spacing.lg },
+  groupLabel: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.slate, marginHorizontal: spacing.lg, marginTop: spacing.lg, marginBottom: spacing.sm, textTransform: 'uppercase' },
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.line },
   menuLabel: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.ink700 },
 });

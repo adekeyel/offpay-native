@@ -6,6 +6,20 @@ import { getOrCreateKeypair } from '../auth/deviceKey';
 import { getOrCreateDeviceId } from '../auth/secureStorage';
 import * as walletApi from '../api/wallet';
 
+// Runs once at module load (i.e. as soon as the app imports this file, well
+// before any push notification can arrive). Without a handler configured,
+// Expo's default behavior is to NOT show or play a sound for notifications
+// received while the app is in the foreground — this was the main reason
+// notifications (and the bell) appeared silent, since the backend already
+// sends `sound: 'default'` on every push (see push.service.js).
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 /**
  * Runs once per unlocked session: makes sure this device has a registered
  * Ed25519 signing key (needed before it can ever send an offline transfer)
@@ -33,6 +47,24 @@ export function useDeviceSetup() {
       } catch {
         // Non-fatal — offline sending will simply fail with a clear error
         // until this succeeds on a later app open with connectivity.
+      }
+
+      // Android requires an explicit notification channel (with its own
+      // sound/importance settings) to reliably play a sound and show a
+      // heads-up banner — without this, background pushes on Android can
+      // arrive silently even though the server requested a sound.
+      if (Platform.OS === 'android') {
+        try {
+          await Notifications.setNotificationChannelAsync('default', {
+            name: 'OffPay notifications',
+            importance: Notifications.AndroidImportance.HIGH,
+            sound: 'default',
+            vibrationPattern: [0, 200, 150, 200],
+            lightColor: '#1F9D74',
+          });
+        } catch {
+          // Non-fatal — worst case, notifications fall back to the system default channel.
+        }
       }
 
       try {
