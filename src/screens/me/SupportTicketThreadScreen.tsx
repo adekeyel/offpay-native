@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -64,6 +65,7 @@ export default function SupportTicketThreadScreen({ route }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="support-thread" position="top" />
         <Text style={styles.subject}>{ticket.subject}</Text>
         {error && <Alert type="error">{error}</Alert>}
         {messages.map((m) => (

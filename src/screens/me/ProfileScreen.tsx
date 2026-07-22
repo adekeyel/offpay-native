@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -44,6 +45,7 @@ export default function ProfileScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="profile" position="top" />
         <View style={styles.card}>
           <View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>
           <Text style={styles.name}>{profile?.full_name ?? ''}</Text>
@@ -88,6 +90,7 @@ export default function ProfileScreen({ navigation }: Props) {
             last
           />
         </View>
+        <AdBanner page="profile" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -18,6 +19,7 @@ export default function RewardsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="rewards" position="top" />
         <Text style={styles.title}>Rewards</Text>
         {error && <Text style={styles.error}>{error}</Text>}
 
@@ -44,6 +46,7 @@ export default function RewardsScreen() {
           <Text style={styles.placeholderTitle}>Daily check-in & Reward Hub — coming soon</Text>
           <Text style={styles.statNote}>These aren't built yet — only cashback above is real.</Text>
         </View>
+        <AdBanner page="rewards" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

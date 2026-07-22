@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -29,6 +30,7 @@ export default function MeScreen({ navigation }: Props) {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <AppHeader right={<Pressable hitSlop={8}><Text style={{ fontSize: 20 }}>⚙️</Text></Pressable>} />
+        <AdBanner page="me" position="top" />
 
         <Pressable style={styles.profileHeader} onPress={() => navigation.navigate('Profile')}>
           <View style={styles.avatar}><Text style={styles.avatarText}>{initials}</Text></View>

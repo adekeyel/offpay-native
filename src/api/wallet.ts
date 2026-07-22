@@ -17,7 +17,7 @@ export function resolveWallet(walletId: string) {
  * api/offlineTransfer.ts). Settles immediately server-side since both
  * wallets live in the same database, unlike a bank payout.
  */
-export function sendToWallet(params: { recipientWalletId: string; amount: number; narration?: string; pin: string }) {
+export function sendToWallet(params: { recipientWalletId: string; amount: number; narration?: string; pin: string; otpCode?: string }) {
   return apiFetch<{ success: true; message: string; data: { reference: string; fee: number; amount: number } }>(
     '/transactions/send-in-app',
     { method: 'POST', body: params }

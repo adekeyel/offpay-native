@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -34,6 +35,8 @@ export default function TransactionHistoryScreen() {
           </View>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No transactions yet.</Text>}
+        ListHeaderComponent={<AdBanner page="transaction-history" position="top" />}
+        ListFooterComponent={<AdBanner page="transaction-history" position="bottom" />}
       />
     </SafeAreaView>
   );

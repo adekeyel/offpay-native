@@ -8,6 +8,7 @@ import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { setCachedOfflineToken } from '../../auth/secureStorage';
 import AdBanner from '../../components/AdBanner';
 import AppHeader from '../../components/AppHeader';
+import NotificationBell from '../../components/NotificationBell';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/MainTabNavigator';
 import type { WalletSummary } from '../../types/api';
@@ -67,7 +68,8 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={{ paddingBottom: spacing.xxl }}>
-        <AppHeader />
+        <AppHeader right={<NotificationBell onPress={() => navigation.navigate('Notifications')} />} />
+        <AdBanner page="dashboard" position="top" />
         <View style={styles.header}>
           <Text style={styles.greeting}>Good day,</Text>
           <Text style={styles.username}>{user?.fullName?.split(' ')[0] ?? ''}</Text>
@@ -120,6 +122,7 @@ export default function HomeScreen({ navigation }: Props) {
             ))}
           </View>
         </View>
+        <AdBanner page="dashboard" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

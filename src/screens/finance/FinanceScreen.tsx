@@ -20,6 +20,7 @@ export default function FinanceScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <AdBanner page="finance" position="top" />
       <View style={styles.header}>
         <Text style={styles.title}>Finance</Text>
         <View style={styles.subtabs}>
@@ -33,6 +34,7 @@ export default function FinanceScreen({ navigation }: Props) {
       </View>
       <AdBanner page="finance" position="middle" />
       {subTab === 'loan' ? <LoanTab /> : <WealthTab navigation={navigation} />}
+      <AdBanner page="finance" position="bottom" />
     </SafeAreaView>
   );
 }

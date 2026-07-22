@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { File, Paths } from 'expo-file-system';
@@ -38,6 +39,7 @@ export default function StatementScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
+        <AdBanner page="statement" position="top" />
         <Text style={{ fontSize: 40 }}>🧾</Text>
         <Text style={styles.title}>Statement of Account</Text>
         <Text style={styles.subtitle}>
@@ -46,6 +48,7 @@ export default function StatementScreen() {
         </Text>
         {status && <Alert type={status.type}>{status.text}</Alert>}
         <Button title="Download statement" onPress={download} loading={loading} />
+        <AdBanner page="statement" position="bottom" />
       </View>
     </SafeAreaView>
   );

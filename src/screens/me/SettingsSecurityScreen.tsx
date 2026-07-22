@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, Pressable, ActivityIndicator } from 'react-native';
+import AdBanner from '../../components/AdBanner';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, Pressable, ActivityIndicator, Switch, Modal, Image } from 'react-native';
 import * as userApi from '../../api/user';
 import * as authApi from '../../api/auth';
+import * as securityApi from '../../api/security';
+import type { SecuritySettings } from '../../api/security';
 import { setLocalPin } from '../../auth/localAuth';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 
 type SectionKey = 'password' | 'pin' | 'lock' | null;
 
 export default function SettingsSecurityScreen() {
   const [openSection, setOpenSection] = useState<SectionKey>(null);
+  const { isOnline } = useNetworkStatus();
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="settings-security" position="top" />
+
+        {!isOnline && (
+          <View style={styles.offlineBanner}>
+            <Text style={styles.offlineBannerText}>
+              You're offline — Google/Email 2FA toggles need a connection to change (email delivery and code
+              verification both require network). Your existing settings still apply once you're back online; PIN
+              and passcode changes below still work offline.
+            </Text>
+          </View>
+        )}
+
+        <SecurityToggles isOnline={isOnline} />
+
         <Section
           title="Change password"
           description="Used to log in to your account."
@@ -32,15 +51,212 @@ export default function SettingsSecurityScreen() {
         </Section>
 
         <Section
-          title="App lock PIN"
-          description="Required to unlock the app itself."
+          title="Passcode (App lock PIN)"
+          description="Required to unlock the app itself — works fully offline."
           open={openSection === 'lock'}
           onToggle={() => setOpenSection((s) => (s === 'lock' ? null : 'lock'))}
         >
           <AppLockPinForm onDone={() => setOpenSection(null)} />
         </Section>
+        <AdBanner page="settings-security" position="bottom" />
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/**
+ * The toggle-based half of Security Settings. Google 2FA and Email 2FA are
+ * both network-dependent by nature (TOTP setup needs a server round trip to
+ * confirm; email OTP obviously needs email delivery), so those two toggles
+ * are disabled while offline rather than allowing a change that can't
+ * actually be verified. Transfer Protection and Biometrics are simple
+ * on/off preferences and stay editable offline; they're just queued like any
+ * other online-only POST would be the next time the app has a connection —
+ * for now they show an inline error if toggled offline, same as any other
+ * settings change elsewhere in the app that needs the server.
+ *
+ * Enforcement itself (whether a transfer actually needs a code) only ever
+ * happens on the ONLINE transfer screens (BankTransferScreen,
+ * SendToWalletScreen) — offline, queued transfers via SendOfflineScreen
+ * never call these toggles at all, so there is nothing to bypass there by
+ * construction.
+ */
+function SecurityToggles({ isOnline }: { isOnline: boolean }) {
+  const [settings, setSettings] = useState<SecuritySettings | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [google2faModalOpen, setGoogle2faModalOpen] = useState(false);
+
+  useEffect(() => {
+    securityApi.getSettings().then((res) => setSettings(res.data)).catch((err) => setError(err.message));
+  }, []);
+
+  async function toggle(key: keyof SecuritySettings, call: (v: boolean) => Promise<any>, value: boolean) {
+    setError(null);
+    if (!isOnline) return setError("You're offline — reconnect to change this setting.");
+    setBusyKey(key);
+    try {
+      await call(value);
+      setSettings((s) => (s ? { ...s, [key]: value } : s));
+    } catch (err: any) {
+      setError(err.message || 'Could not update this setting.');
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
+  async function onToggleGoogle2fa(value: boolean) {
+    if (!isOnline) return setError("You're offline — reconnect to change this setting.");
+    if (value) {
+      setGoogle2faModalOpen(true);
+    } else {
+      setError(null);
+      setBusyKey('google2fa_enabled');
+      try {
+        await securityApi.disableGoogle2fa();
+        setSettings((s) => (s ? { ...s, google2fa_enabled: false } : s));
+      } catch (err: any) {
+        setError(err.message || 'Could not disable Google 2FA.');
+      } finally {
+        setBusyKey(null);
+      }
+    }
+  }
+
+  if (!settings) {
+    return error ? <Text style={styles.errorText}>{error}</Text> : <ActivityIndicator style={{ marginVertical: spacing.md }} />;
+  }
+
+  return (
+    <View style={styles.toggleCard}>
+      {error && <Text style={[styles.errorText, { padding: spacing.md, paddingBottom: 0 }]}>{error}</Text>}
+
+      <ToggleRow
+        title="Transfer Protection"
+        description="Add an extra layer of security to fund transfers by requiring verification before completion."
+        value={settings.transfer_protection_enabled}
+        disabled={busyKey === 'transfer_protection_enabled'}
+        onChange={(v) => toggle('transfer_protection_enabled', securityApi.setTransferProtection, v)}
+      />
+      <ToggleRow
+        title="Enable Biometrics"
+        description="Approve logins & transactions using Face ID on this device."
+        value={settings.biometrics_enabled}
+        disabled={busyKey === 'biometrics_enabled'}
+        onChange={(v) => toggle('biometrics_enabled', securityApi.setBiometrics, v)}
+      />
+      <ToggleRow
+        title="Enable Google 2FA for Withdrawals"
+        description="All transactions will require a Google 2FA code generated on your device to verify your identity."
+        value={settings.google2fa_enabled}
+        disabled={busyKey === 'google2fa_enabled' || !isOnline}
+        onChange={onToggleGoogle2fa}
+      />
+      <ToggleRow
+        title="Enable Email 2FA for Withdrawals"
+        description="All transactions will require an Email OTP code to verify your identity."
+        value={settings.email2fa_withdrawals_enabled}
+        disabled={busyKey === 'email2fa_withdrawals_enabled' || !isOnline}
+        onChange={(v) => toggle('email2fa_withdrawals_enabled', securityApi.setEmail2fa, v)}
+        last
+      />
+
+      {google2faModalOpen && (
+        <Google2faSetupModal
+          onClose={() => setGoogle2faModalOpen(false)}
+          onEnabled={() => {
+            setSettings((s) => (s ? { ...s, google2fa_enabled: true } : s));
+            setGoogle2faModalOpen(false);
+          }}
+        />
+      )}
+    </View>
+  );
+}
+
+function ToggleRow({
+  title, description, value, disabled, onChange, last,
+}: {
+  title: string; description: string; value: boolean; disabled?: boolean; onChange: (v: boolean) => void; last?: boolean;
+}) {
+  return (
+    <View style={[styles.toggleRow, !last && styles.toggleRowBorder]}>
+      <View style={{ flex: 1, paddingRight: spacing.md }}>
+        <Text style={styles.toggleTitle}>{title}</Text>
+        <Text style={styles.toggleDesc}>{description}</Text>
+      </View>
+      <Switch
+        value={value}
+        disabled={disabled}
+        onValueChange={onChange}
+        trackColor={{ false: colors.line, true: colors.unlock }}
+        thumbColor={colors.white}
+      />
+    </View>
+  );
+}
+
+/** Step 1: fetch a fresh secret + QR. Step 2: confirm the 6-digit code the authenticator app shows to actually turn it on. */
+function Google2faSetupModal({ onClose, onEnabled }: { onClose: () => void; onEnabled: () => void }) {
+  const [setup, setSetup] = useState<{ secret: string; qrDataUrl: string } | null>(null);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    securityApi.startGoogle2fa().then((res) => setSetup(res.data)).catch((err) => setError(err.message));
+  }, []);
+
+  async function confirm() {
+    setError(null);
+    if (!/^\d{6}$/.test(code)) return setError('Enter the 6-digit code.');
+    setLoading(true);
+    try {
+      await securityApi.confirmGoogle2fa(code);
+      onEnabled();
+    } catch (err: any) {
+      setError(err.message || 'Incorrect or expired code.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCard}>
+          <Text style={styles.modalTitle}>Set up Google 2FA</Text>
+          <Text style={styles.modalSubtitle}>
+            Scan this with Google Authenticator (or any TOTP app), then enter the 6-digit code it shows.
+          </Text>
+
+          {setup ? (
+            <>
+              <Image source={{ uri: setup.qrDataUrl }} style={styles.qrImage} />
+              <Text style={styles.secretText}>{setup.secret}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="6-digit code"
+                keyboardType="number-pad"
+                maxLength={6}
+                value={code}
+                onChangeText={(v) => setCode(v.replace(/\D/g, ''))}
+              />
+              {error && <Text style={styles.errorText}>{error}</Text>}
+              <SubmitButton loading={loading} onPress={confirm} label="Confirm & enable" />
+              <Pressable onPress={onClose} style={{ marginTop: spacing.sm, alignItems: 'center' }}>
+                <Text style={styles.link}>Cancel</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              {!error && <ActivityIndicator style={{ marginTop: spacing.md }} />}
+              {error && <Text style={styles.errorText}>{error}</Text>}
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -202,6 +418,22 @@ function SubmitButton({ loading, onPress, label }: { loading: boolean; onPress: 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.paper },
   content: { padding: spacing.lg, gap: spacing.md },
+  offlineBanner: { backgroundColor: colors.lockDim, borderRadius: radius.lg, padding: spacing.md },
+  offlineBannerText: { fontSize: fontSizes.xs, color: colors.ink, lineHeight: 16 },
+  toggleCard: { backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', padding: spacing.md },
+  toggleRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.line },
+  toggleTitle: { fontSize: fontSizes.sm, fontWeight: '700', color: colors.ink },
+  toggleDesc: { fontSize: fontSizes.xs, color: colors.slate, marginTop: 2, lineHeight: 16 },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', padding: spacing.lg },
+  modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, padding: spacing.lg },
+  modalTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.ink },
+  modalSubtitle: { fontSize: fontSizes.xs, color: colors.slate, marginTop: 4, marginBottom: spacing.md, lineHeight: 16 },
+  qrImage: { width: 180, height: 180, alignSelf: 'center', marginBottom: spacing.sm },
+  secretText: {
+    fontSize: fontSizes.xs, color: colors.slate, textAlign: 'center', fontFamily: 'monospace',
+    backgroundColor: colors.paper, borderRadius: radius.md, padding: spacing.sm, marginBottom: spacing.md,
+  },
   section: { backgroundColor: colors.white, borderRadius: radius.lg, overflow: 'hidden' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', padding: spacing.md },
   sectionTitle: { fontSize: fontSizes.sm, fontWeight: '700', color: colors.ink },
@@ -217,4 +449,5 @@ const styles = StyleSheet.create({
   successText: { color: colors.unlock, fontSize: fontSizes.xs, fontWeight: '600' },
   submitBtn: { backgroundColor: colors.ink, borderRadius: radius.pill, paddingVertical: 12, alignItems: 'center', marginTop: spacing.xs },
   submitText: { color: colors.white, fontWeight: '700', fontSize: fontSizes.sm },
+  link: { fontSize: fontSizes.sm, color: colors.slate, textDecorationLine: 'underline' },
 });

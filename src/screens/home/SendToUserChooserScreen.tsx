@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -11,6 +12,7 @@ export default function SendToUserChooserScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
+        <AdBanner page="send-to-user" position="top" />
         <Text style={styles.title}>Send to an OffPay user</Text>
         <Text style={styles.subtitle}>Choose how you'd like to send this transfer.</Text>
 
@@ -29,6 +31,7 @@ export default function SendToUserChooserScreen({ navigation }: Props) {
             <Text style={styles.optionSubtitle}>Scan a QR code in person. Works with zero connectivity.</Text>
           </View>
         </Pressable>
+        <AdBanner page="send-to-user" position="bottom" />
       </View>
     </SafeAreaView>
   );

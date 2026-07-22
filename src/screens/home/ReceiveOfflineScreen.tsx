@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -33,6 +34,7 @@ export default function ReceiveOfflineScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="receive-offline" position="top" />
         <Text style={styles.title}>Show this to the sender</Text>
         <Text style={styles.subtitle}>
           They'll scan this to identify your account — works with no internet connection on
@@ -55,6 +57,7 @@ export default function ReceiveOfflineScreen() {
             ))}
           </View>
         )}
+        <AdBanner page="receive-offline" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

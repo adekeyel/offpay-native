@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -55,6 +56,7 @@ export default function SupportScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="support" position="top" />
         <Text style={styles.title}>Contact support</Text>
 
         {error && <Alert type="error">{error}</Alert>}
@@ -89,6 +91,7 @@ export default function SupportScreen({ navigation }: Props) {
             ))}
           </>
         )}
+        <AdBanner page="support" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

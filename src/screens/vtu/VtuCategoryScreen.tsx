@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
@@ -66,6 +67,7 @@ export default function VtuCategoryScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="vtu-category" position="top" />
         <Text style={styles.label}>Provider</Text>
         <View style={styles.pickerWrap}>
           <Picker selectedValue={provider} onValueChange={(v) => { setProvider(v); setProductId(''); }}>
@@ -91,6 +93,7 @@ export default function VtuCategoryScreen({ route, navigation }: Props) {
 
         {status && <Alert type={status.type}>{status.text}</Alert>}
         <Button title="Pay" onPress={submit} loading={loading} />
+        <AdBanner page="vtu-category" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

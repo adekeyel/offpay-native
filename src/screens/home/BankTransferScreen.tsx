@@ -6,10 +6,11 @@ import Alert from '../../components/Alert';
 import PinInput from '../../components/PinInput';
 import * as bankApi from '../../api/bank';
 import type { Bank } from '../../api/bank';
+import * as securityApi from '../../api/security';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 
-type Step = 'details' | 'confirm' | 'done';
+type Step = 'details' | 'confirm' | 'otp' | 'done';
 
 export default function BankTransferScreen() {
   const { isOnline } = useNetworkStatus();
@@ -26,10 +27,18 @@ export default function BankTransferScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [pinResetSignal, setPinResetSignal] = useState(0);
   const [result, setResult] = useState<{ message: string } | null>(null);
+  const [otpMethod, setOtpMethod] = useState<'google' | 'email' | null>(null);
+  const [otpCode, setOtpCode] = useState('');
+  const [pin, setPin] = useState('');
+  const [sendingEmailOtp, setSendingEmailOtp] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
 
   useEffect(() => {
     if (!isOnline) return;
-    bankApi.listBanks().then((res) => setBanks(res.data)).catch(() => setError('Could not load bank list.'));
+    bankApi.listBanks().then((res: any) => {
+      setBanks(res.data);
+      if (res.warning) setError(res.warning);
+    }).catch(() => setError('Could not load bank list.'));
   }, [isOnline]);
 
   useEffect(() => {
@@ -59,20 +68,57 @@ export default function BankTransferScreen() {
     setStep('confirm');
   }
 
-  async function submitWithPin(pin: string) {
+  async function submitWithPin(enteredPin: string) {
+    if (!selectedBank) return;
+    setPin(enteredPin);
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await bankApi.transferToBank({
+        accountNumber, bankCode: selectedBank.code, bankName: selectedBank.name,
+        amount: parseFloat(amount), narration: narration || undefined, pin: enteredPin,
+      });
+      setResult({ message: res.message });
+      setStep('done');
+    } catch (err: any) {
+      if (err.details?.code === 'TRANSFER_OTP_REQUIRED') {
+        setOtpMethod(err.details.method);
+        setStep('otp');
+        return;
+      }
+      setError(err.message || 'Transfer could not be completed.');
+      setPinResetSignal((n) => n + 1);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function sendEmailOtp() {
+    setSendingEmailOtp(true);
+    setError(null);
+    try {
+      await securityApi.requestTransferOtp();
+      setEmailOtpSent(true);
+    } catch (err: any) {
+      setError(err.message || 'Could not send code.');
+    } finally {
+      setSendingEmailOtp(false);
+    }
+  }
+
+  async function submitWithOtp() {
     if (!selectedBank) return;
     setSubmitting(true);
     setError(null);
     try {
       const res = await bankApi.transferToBank({
         accountNumber, bankCode: selectedBank.code, bankName: selectedBank.name,
-        amount: parseFloat(amount), narration: narration || undefined, pin,
+        amount: parseFloat(amount), narration: narration || undefined, pin, otpCode,
       });
       setResult({ message: res.message });
       setStep('done');
     } catch (err: any) {
-      setError(err.message || 'Transfer could not be completed.');
-      setPinResetSignal((n) => n + 1);
+      setError(err.message || 'Incorrect or expired code.');
     } finally {
       setSubmitting(false);
     }
@@ -84,6 +130,36 @@ export default function BankTransferScreen() {
         <View style={styles.centered}>
           <Text style={styles.title}>Transfer sent</Text>
           <Text style={styles.subtitle}>{result?.message}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (step === 'otp') {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Verify to continue</Text>
+          <Text style={styles.subtitle}>
+            {otpMethod === 'google'
+              ? 'Enter the 6-digit code from your authenticator app.'
+              : 'Enter the OTP sent to your email.'}
+          </Text>
+          {otpMethod === 'email' && (
+            <Button
+              title={sendingEmailOtp ? 'Sending…' : emailOtpSent ? 'Resend code' : 'Send code'}
+              variant="ghost"
+              onPress={sendEmailOtp}
+              disabled={sendingEmailOtp}
+              style={{ marginTop: spacing.md }}
+            />
+          )}
+          <Input label="Verification code" keyboardType="number-pad" maxLength={6} value={otpCode} onChangeText={(v) => setOtpCode(v.replace(/\D/g, ''))} />
+          {error && <Alert type="error">{error}</Alert>}
+          <Button title={submitting ? 'Verifying…' : 'Confirm transfer'} onPress={submitWithOtp} disabled={submitting || otpCode.length !== 6} />
+          <Pressable onPress={() => setStep('confirm')} style={{ marginTop: spacing.lg }}>
+            <Text style={styles.link}>Go back</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     );

@@ -8,7 +8,7 @@ export interface Bank {
 }
 
 export function listBanks() {
-  return apiFetch<{ success: true; data: Bank[] }>('/banks');
+  return apiFetch<{ success: true; data: Bank[]; warning?: string }>('/banks');
 }
 
 export function resolveExternalAccount(accountNumber: string, bankCode: string) {
@@ -17,7 +17,7 @@ export function resolveExternalAccount(accountNumber: string, bankCode: string) 
   });
 }
 
-export function transferToBank(params: { accountNumber: string; bankCode: string; bankName: string; amount: number; narration?: string; pin: string }) {
+export function transferToBank(params: { accountNumber: string; bankCode: string; bankName: string; amount: number; narration?: string; pin: string; otpCode?: string }) {
   return apiFetch<{ success: true; message: string; data: any }>('/wallet/transfer-to-bank', {
     method: 'POST', body: params,
   });

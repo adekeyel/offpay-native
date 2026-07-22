@@ -5,6 +5,7 @@ import { Text } from 'react-native';
 import { colors } from '../theme/colors';
 
 import HomeScreen from '../screens/home/HomeScreen';
+import NotificationsScreen from '../screens/home/NotificationsScreen';
 import VtuCategoryScreen from '../screens/vtu/VtuCategoryScreen';
 import SendToUserChooserScreen from '../screens/home/SendToUserChooserScreen';
 import SendToWalletScreen from '../screens/home/SendToWalletScreen';
@@ -31,6 +32,7 @@ import SupportTicketThreadScreen from '../screens/me/SupportTicketThreadScreen';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
+  Notifications: undefined;
   VtuCategory: { category: 'airtime' | 'data' | 'cable' | 'electricity' };
   SendToUserChooser: undefined;
   SendToWallet: undefined;
@@ -59,6 +61,7 @@ function HomeStack() {
   return (
     <HomeStackNav.Navigator screenOptions={{ headerShown: false }}>
       <HomeStackNav.Screen name="HomeMain" component={HomeScreen} />
+      <HomeStackNav.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: true, title: 'Notifications' }} />
       <HomeStackNav.Screen name="VtuCategory" component={VtuCategoryScreen} options={{ headerShown: true, title: '' }} />
       <HomeStackNav.Screen name="SendToUserChooser" component={SendToUserChooserScreen} options={{ headerShown: true, title: 'To OffPay User' }} />
       <HomeStackNav.Screen name="SendToWallet" component={SendToWalletScreen} options={{ headerShown: true, title: 'Send online' }} />

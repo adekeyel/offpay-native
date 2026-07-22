@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -99,6 +100,7 @@ export default function WealthProductScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="wealth-product" position="top" />
         <Text style={styles.title}>{product.name}</Text>
         <Text style={styles.description}>{product.description}</Text>
         <Text style={styles.rate}>{product.interest_rate}% per year{product.lock_days > 0 ? ` · ${product.lock_days}-day lock` : ' · withdraw anytime'}</Text>
@@ -127,6 +129,7 @@ export default function WealthProductScreen({ route, navigation }: Props) {
             <Button title="Open account" onPress={openAccount} loading={busy} />
           </View>
         )}
+        <AdBanner page="wealth-product" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

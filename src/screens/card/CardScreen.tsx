@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -56,6 +57,7 @@ export default function CardScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="card" position="top" />
         <Text style={styles.title}>Card</Text>
         {status && <Alert type={status.type}>{status.text}</Alert>}
 
@@ -98,6 +100,7 @@ export default function CardScreen() {
             </View>
           </View>
         )}
+        <AdBanner page="card" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );

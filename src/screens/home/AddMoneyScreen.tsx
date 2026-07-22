@@ -1,3 +1,4 @@
+import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Share } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -33,6 +34,7 @@ export default function AddMoneyScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <AdBanner page="add-money" position="top" />
         {error && <Alert type="error">{error}</Alert>}
 
         {!loading && summary && !summary.accountNumber && (
@@ -57,6 +59,7 @@ export default function AddMoneyScreen() {
             <Button title="Share account details" variant="ghost" onPress={shareDetails} style={{ marginTop: spacing.lg }} />
           </>
         )}
+        <AdBanner page="add-money" position="bottom" />
       </ScrollView>
     </SafeAreaView>
   );
