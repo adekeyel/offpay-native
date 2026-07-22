@@ -25,6 +25,7 @@ import MeScreen from '../screens/me/MeScreen';
 import ProfileScreen from '../screens/me/ProfileScreen';
 import StatementScreen from '../screens/me/StatementScreen';
 import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
+import TransactionDetailScreen from '../screens/me/TransactionDetailScreen';
 import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
 import TierUpgradeScreen from '../screens/me/TierUpgradeScreen';
 import SupportScreen from '../screens/me/SupportScreen';
@@ -33,6 +34,7 @@ import AboutScreen from '../screens/legal/AboutScreen';
 import TermsScreen from '../screens/legal/TermsScreen';
 import PrivacyPolicyScreen from '../screens/legal/PrivacyPolicyScreen';
 import ComplianceScreen from '../screens/legal/ComplianceScreen';
+import type { Transaction } from '../types/api';
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -54,6 +56,7 @@ export type MeStackParamList = {
   Profile: undefined;
   Statement: undefined;
   TransactionHistory: undefined;
+  TransactionDetail: { transaction: Transaction };
   SettingsSecurity: undefined;
   TierUpgrade: undefined;
   Support: undefined;
@@ -117,6 +120,7 @@ function MeStack() {
       <MeStackNav.Screen name="Profile" component={ProfileScreen} options={{ headerShown: true, title: 'My Profile' }} />
       <MeStackNav.Screen name="Statement" component={StatementScreen} options={{ headerShown: true, title: 'Statement of Account' }} />
       <MeStackNav.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ headerShown: true, title: 'Transactions' }} />
+      <MeStackNav.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ headerShown: true, title: 'Transaction Details' }} />
       <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />
       <MeStackNav.Screen name="TierUpgrade" component={TierUpgradeScreen} options={{ headerShown: true, title: 'Upgrade Tier' }} />
       <MeStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: true, title: 'Support' }} />
@@ -149,7 +153,20 @@ export default function MainTabNavigator() {
       <Tab.Screen name="Card" component={CardStack} options={{ tabBarIcon: ({ focused }) => <TabIcon symbol="▭" focused={focused} /> }} />
       <Tab.Screen name="Finance" component={FinanceStack} options={{ tabBarIcon: ({ focused }) => <TabIcon symbol="◈" focused={focused} /> }} />
       <Tab.Screen name="Rewards" component={RewardsStack} options={{ tabBarIcon: ({ focused }) => <TabIcon symbol="✦" focused={focused} /> }} />
-      <Tab.Screen name="Me" component={MeStack} options={{ tabBarIcon: ({ focused }) => <TabIcon symbol="●" focused={focused} /> }} />
+      <Tab.Screen
+        name="Me"
+        component={MeStack}
+        options={{ tabBarIcon: ({ focused }) => <TabIcon symbol="●" focused={focused} /> }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            // Without this, tapping the "Me" tab shows whatever screen was
+            // last open in it (e.g. Settings & Security, if you got there
+            // via the dashboard gear icon shortcut) instead of the main Me
+            // screen — which looks like Me/Tiers/Statement/etc. vanished.
+            navigation.navigate('Me', { screen: 'MeMain' });
+          },
+        })}
+      />
     </Tab.Navigator>
   );
 }

@@ -58,7 +58,6 @@ export function useDeviceSetup() {
           await Notifications.setNotificationChannelAsync('default', {
             name: 'OffPay notifications',
             importance: Notifications.AndroidImportance.HIGH,
-            sound: 'default',
             vibrationPattern: [0, 200, 150, 200],
             lightColor: '#1F9D74',
           });

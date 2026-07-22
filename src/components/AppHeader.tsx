@@ -21,7 +21,7 @@ export default function AppHeader({ right, dark, onPress }: AppHeaderProps) {
   return (
     <View style={styles.row}>
       <Wrapper style={styles.brand} onPress={onPress} hitSlop={8}>
-        <Image source={require('../../assets/logo.png')} style={styles.mark} resizeMode="contain" />
+       <Image source={require('../../assets/icon.png')} style={styles.mark} resizeMode="contain" />
         <Text style={[styles.wordmark, dark && styles.wordmarkDark]}>
           Off<Text style={{ color: colors.unlock }}>Pay</Text>
         </Text>

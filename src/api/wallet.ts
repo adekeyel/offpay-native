@@ -58,6 +58,12 @@ export function downloadStatementUrl() {
   return `${API_URL}/transactions/statement/download`;
 }
 
+export function receiptUrl(transactionId: string) {
+  // Same idea as downloadStatementUrl, but for a single transaction's
+  // receipt — see TransactionDetailScreen for the download/share implementation.
+  return `${API_URL}/transactions/${transactionId}/receipt`;
+}
+
 export function getVtuProducts(category: 'airtime' | 'data' | 'cable' | 'electricity') {
   return apiFetch<{ success: true; data: { providers: string[]; plans: VtuProduct[] } }>(`/vtu/products/${category}`);
 }

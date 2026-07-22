@@ -12,7 +12,7 @@ export default function LandingScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Image source={require('../../../assets/logo.png')} style={styles.logoImage} resizeMode="contain" />
+        <Image source={require('../../../assets/icon.png')} style={styles.logoImage} resizeMode="contain" />
         <Text style={styles.logo}>
           Off<Text style={{ color: colors.unlock }}>Pay</Text>
         </Text>

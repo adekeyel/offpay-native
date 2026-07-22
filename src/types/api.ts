@@ -46,8 +46,16 @@ export interface Transaction {
   direction: 'debit' | 'credit';
   amount: string | number;
   fee: string | number;
+  balance_before: string | number;
+  balance_after: string | number;
   status: string;
+  provider: string | null;
+  provider_reference: string | null;
+  counterparty_name: string | null;
+  counterparty_bank: string | null;
+  counterparty_number: string | null;
   narration: string;
+  meta: Record<string, any> | null;
   created_at: string;
 }
 
