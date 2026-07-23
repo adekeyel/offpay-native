@@ -1,6 +1,6 @@
 import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Alert as RNAlert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
@@ -55,6 +55,32 @@ export default function CardScreen() {
     }
   }
 
+  async function remove() {
+    if (!card) return;
+    setBusy(true);
+    setStatus(null);
+    try {
+      await walletApi.deleteCard(card.id);
+      setCard(null);
+      setStatus({ type: 'success', text: 'Card deleted. You can generate a new one anytime.' });
+    } catch (err: any) {
+      setStatus({ type: 'error', text: err.message });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function confirmDelete() {
+    RNAlert.alert(
+      'Delete card?',
+      'This permanently deletes your virtual card. You can generate a new one afterward, but this one cannot be recovered.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: remove },
+      ]
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -98,6 +124,7 @@ export default function CardScreen() {
               {card.status !== 'blocked' && card.status !== 'expired' && (
                 <Button title="Block permanently" variant="danger" onPress={() => act('block')} loading={busy} />
               )}
+              <Button title="Delete card" variant="danger" onPress={confirmDelete} loading={busy} />
             </View>
           </View>
         )}

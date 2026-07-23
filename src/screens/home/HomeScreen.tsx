@@ -12,7 +12,7 @@ import AppHeader from '../../components/AppHeader';
 import NotificationBell from '../../components/NotificationBell';
 import { colors, spacing, radius, fontSizes } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/MainTabNavigator';
-import type { WalletSummary } from '../../types/api';
+import type { WalletSummary, Transaction } from '../../types/api';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 
@@ -28,7 +28,10 @@ export default function HomeScreen({ navigation }: Props) {
   const { isOnline } = useNetworkStatus();
   const user = session.status === 'unlocked' ? session.user : null;
   const [summary, setSummary] = useState<WalletSummary | null>(null);
-  const [balanceVisible, setBalanceVisible] = useState(true);
+  // Hidden is the default/primary state — the eye icon is how the user
+  // opts into showing it, not the other way around.
+  const [balanceVisible, setBalanceVisible] = useState(false);
+  const [recentTxn, setRecentTxn] = useState<Transaction | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [showingCached, setShowingCached] = useState(false);
@@ -54,6 +57,9 @@ export default function HomeScreen({ navigation }: Props) {
     } catch (err: any) {
       setError(err.message || 'Could not load your wallet.');
     }
+    // Independent of the summary call above — a failure here shouldn't
+    // block the balance card from showing, so it's caught on its own.
+    walletApi.getTransactionHistory(1).then((res) => setRecentTxn(res.data[0] || null)).catch(() => {});
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
@@ -109,6 +115,22 @@ export default function HomeScreen({ navigation }: Props) {
             </Pressable>
           </View>
         </View>
+
+        {recentTxn && (
+          <Pressable
+            style={styles.recentCard}
+            onPress={() => navigation.getParent()?.navigate('Me' as never, { screen: 'TransactionHistory' } as never)}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={styles.recentLabel}>Most recent</Text>
+              <Text style={styles.recentNarration} numberOfLines={1}>{recentTxn.narration}</Text>
+            </View>
+            <Text style={[styles.recentAmount, recentTxn.direction === 'credit' ? styles.recentCredit : styles.recentDebit]}>
+              {recentTxn.direction === 'credit' ? '+' : '−'}₦{Number(recentTxn.amount).toLocaleString()}
+            </Text>
+            <Text style={styles.recentChevron}>›</Text>
+          </Pressable>
+        )}
 
         {!isOnline && (
           <View style={styles.offlineBanner}>
@@ -173,6 +195,17 @@ const styles = StyleSheet.create({
   accountNumber: { fontSize: fontSizes.xs, color: 'rgba(255,255,255,0.6)' },
   addMoneyBtn: { backgroundColor: colors.white, borderRadius: radius.pill, paddingVertical: 7, paddingHorizontal: 14 },
   addMoneyText: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.ink },
+  recentCard: {
+    flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.lg, marginTop: -spacing.sm, marginBottom: spacing.sm,
+    backgroundColor: colors.white, borderRadius: radius.md, padding: spacing.md,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1,
+  },
+  recentLabel: { fontSize: 10, color: colors.slate, fontWeight: '600' },
+  recentNarration: { fontSize: fontSizes.sm, color: colors.ink, fontWeight: '600', marginTop: 1 },
+  recentAmount: { fontSize: fontSizes.sm, fontWeight: '700', marginLeft: spacing.sm },
+  recentCredit: { color: colors.unlock },
+  recentDebit: { color: colors.ink },
+  recentChevron: { fontSize: fontSizes.lg, color: colors.slate, marginLeft: spacing.xs },
   errorText: { color: colors.danger, marginHorizontal: spacing.lg, fontSize: fontSizes.sm },
   offlineBanner: { marginHorizontal: spacing.lg, marginBottom: spacing.sm, backgroundColor: colors.lockDim, borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 12 },
   offlineBannerText: { color: colors.ink700, fontSize: fontSizes.xs, fontWeight: '600' },

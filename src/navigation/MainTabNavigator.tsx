@@ -27,6 +27,7 @@ import StatementScreen from '../screens/me/StatementScreen';
 import TransactionHistoryScreen from '../screens/me/TransactionHistoryScreen';
 import TransactionDetailScreen from '../screens/me/TransactionDetailScreen';
 import SettingsSecurityScreen from '../screens/me/SettingsSecurityScreen';
+import BiometricSetupScreen from '../screens/me/BiometricSetupScreen';
 import TierUpgradeScreen from '../screens/me/TierUpgradeScreen';
 import SupportScreen from '../screens/me/SupportScreen';
 import SupportTicketThreadScreen from '../screens/me/SupportTicketThreadScreen';
@@ -58,6 +59,7 @@ export type MeStackParamList = {
   TransactionHistory: undefined;
   TransactionDetail: { transaction: Transaction };
   SettingsSecurity: undefined;
+  BiometricSetup: undefined;
   TierUpgrade: undefined;
   Support: undefined;
   SupportTicketThread: { ticketId: string };
@@ -122,6 +124,7 @@ function MeStack() {
       <MeStackNav.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ headerShown: true, title: 'Transactions' }} />
       <MeStackNav.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ headerShown: true, title: 'Transaction Details' }} />
       <MeStackNav.Screen name="SettingsSecurity" component={SettingsSecurityScreen} options={{ headerShown: true, title: 'Settings & Security' }} />
+      <MeStackNav.Screen name="BiometricSetup" component={BiometricSetupScreen} options={{ headerShown: true, title: 'Set up biometrics' }} />
       <MeStackNav.Screen name="TierUpgrade" component={TierUpgradeScreen} options={{ headerShown: true, title: 'Upgrade Tier' }} />
       <MeStackNav.Screen name="Support" component={SupportScreen} options={{ headerShown: true, title: 'Support' }} />
       <MeStackNav.Screen name="SupportTicketThread" component={SupportTicketThreadScreen} options={{ headerShown: true, title: 'Conversation' }} />

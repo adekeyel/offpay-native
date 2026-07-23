@@ -1,6 +1,7 @@
 import AdBanner from '../../components/AdBanner';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, Pressable, ActivityIndicator, Switch, Modal, Image } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as userApi from '../../api/user';
 import * as authApi from '../../api/auth';
 import * as securityApi from '../../api/security';
@@ -9,10 +10,12 @@ import { setLocalPin } from '../../auth/localAuth';
 import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { colors, spacing, fontSizes, radius } from '../../theme/colors';
 import AppFooter from '../../components/AppFooter';
+import type { MeStackParamList } from '../../navigation/MainTabNavigator';
 
 type SectionKey = 'password' | 'pin' | 'lock' | null;
+type Props = NativeStackScreenProps<MeStackParamList, 'SettingsSecurity'>;
 
-export default function SettingsSecurityScreen() {
+export default function SettingsSecurityScreen({ navigation }: Props) {
   const [openSection, setOpenSection] = useState<SectionKey>(null);
   const { isOnline } = useNetworkStatus();
 
@@ -31,7 +34,7 @@ export default function SettingsSecurityScreen() {
           </View>
         )}
 
-        <SecurityToggles isOnline={isOnline} />
+        <SecurityToggles isOnline={isOnline} navigation={navigation} />
 
         <Section
           title="Change password"
@@ -83,7 +86,7 @@ export default function SettingsSecurityScreen() {
  * never call these toggles at all, so there is nothing to bypass there by
  * construction.
  */
-function SecurityToggles({ isOnline }: { isOnline: boolean }) {
+function SecurityToggles({ isOnline, navigation }: { isOnline: boolean; navigation: Props['navigation'] }) {
   const [settings, setSettings] = useState<SecuritySettings | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -125,6 +128,38 @@ function SecurityToggles({ isOnline }: { isOnline: boolean }) {
     }
   }
 
+  async function onToggleBiometrics(value: boolean) {
+    if (!isOnline) return setError("You're offline — reconnect to change this setting.");
+    if (value) {
+      // First time turning this on: route through actual device biometric
+      // enrollment/confirmation instead of just flipping the setting on
+      // trust. BiometricSetupScreen calls securityApi.setBiometrics(true)
+      // itself once the device confirms a real fingerprint/Face ID/etc.
+      navigation.navigate('BiometricSetup');
+    } else {
+      setError(null);
+      setBusyKey('biometrics_enabled');
+      try {
+        await securityApi.setBiometrics(false);
+        setSettings((s) => (s ? { ...s, biometrics_enabled: false } : s));
+      } catch (err: any) {
+        setError(err.message || 'Could not disable biometrics.');
+      } finally {
+        setBusyKey(null);
+      }
+    }
+  }
+
+  // Picks up settings.biometrics_enabled turning true after coming back from
+  // BiometricSetupScreen (that screen updates the server directly, not via
+  // this component's state).
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      securityApi.getSettings().then((res) => setSettings(res.data)).catch(() => {});
+    });
+    return unsubscribe;
+  }, [navigation]);
+
   if (!settings) {
     return error ? <Text style={styles.errorText}>{error}</Text> : <ActivityIndicator style={{ marginVertical: spacing.md }} />;
   }
@@ -145,7 +180,7 @@ function SecurityToggles({ isOnline }: { isOnline: boolean }) {
         description="Approve logins & transactions using Face ID on this device."
         value={settings.biometrics_enabled}
         disabled={busyKey === 'biometrics_enabled'}
-        onChange={(v) => toggle('biometrics_enabled', securityApi.setBiometrics, v)}
+        onChange={onToggleBiometrics}
       />
       <ToggleRow
         title="Enable Google 2FA for Withdrawals"

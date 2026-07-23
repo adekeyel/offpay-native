@@ -84,6 +84,10 @@ export function updateCardStatus(cardId: string, action: 'freeze' | 'unfreeze' |
   return apiFetch<{ success: true; data: Card }>(`/cards/${cardId}/status`, { method: 'POST', body: { action } });
 }
 
+export function deleteCard(cardId: string) {
+  return apiFetch<{ success: true; message: string }>(`/cards/${cardId}`, { method: 'DELETE' });
+}
+
 export function registerDeviceKey(deviceId: string, publicKey: string, platform: 'ios' | 'android') {
   return apiFetch<{ success: true }>('/devices/key', { method: 'POST', body: { deviceId, publicKey, platform } });
 }
