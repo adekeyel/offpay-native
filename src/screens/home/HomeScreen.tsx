@@ -81,7 +81,17 @@ export default function HomeScreen({ navigation }: Props) {
               <Pressable
                 hitSlop={10}
                 style={styles.headerIconBtn}
-                onPress={() => navigation.getParent()?.navigate('Me' as never, { screen: 'SettingsSecurity' } as never)}
+                onPress={() => {
+                  // Navigating straight to a nested screen on a tab that
+                  // hasn't mounted yet skips its initial route, so the
+                  // stack ends up with ONLY this screen in it — no back
+                  // button, and no way to get to MeMain from here. Mounting
+                  // the tab at its default screen first, then pushing the
+                  // target on top, guarantees a real back stack.
+                  const parent = navigation.getParent();
+                  parent?.navigate('Me' as never);
+                  parent?.navigate('Me' as never, { screen: 'SettingsSecurity' } as never);
+                }}
               >
                 <Text style={styles.headerIcon}>⚙️</Text>
               </Pressable>
@@ -119,7 +129,14 @@ export default function HomeScreen({ navigation }: Props) {
         {recentTxn && (
           <Pressable
             style={styles.recentCard}
-            onPress={() => navigation.getParent()?.navigate('Me' as never, { screen: 'TransactionHistory' } as never)}
+            onPress={() => {
+              // Same fix as the gear icon above — mount the Me tab at its
+              // default screen first so TransactionHistory is pushed on
+              // top of MeMain instead of replacing the whole stack.
+              const parent = navigation.getParent();
+              parent?.navigate('Me' as never);
+              parent?.navigate('Me' as never, { screen: 'TransactionHistory' } as never);
+            }}
           >
             <View style={{ flex: 1 }}>
               <Text style={styles.recentLabel}>Most recent</Text>

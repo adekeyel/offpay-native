@@ -15,13 +15,22 @@ export default function CardScreen() {
   const [card, setCard] = useState<Card | null | undefined>(undefined);
   const [status, setStatus] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await walletApi.getMyCard();
       setCard(res.data);
+      setStatus(null);
     } catch (err: any) {
+      // Previously `card` was left as `undefined` on error, which made the
+      // "Loading…" text below render forever underneath the error banner —
+      // there was no way to tell the request had actually finished (and
+      // failed) rather than still being in flight.
       setStatus({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -88,7 +97,14 @@ export default function CardScreen() {
         <Text style={styles.title}>Card</Text>
         {status && <Alert type={status.type}>{status.text}</Alert>}
 
-        {card === undefined && <Text style={styles.subtitle}>Loading…</Text>}
+        {loading && card === undefined && <Text style={styles.subtitle}>Loading…</Text>}
+
+        {!loading && card === undefined && (
+          <View style={styles.emptyState}>
+            <Text style={styles.subtitle}>We couldn't load your card right now.</Text>
+            <Button title="Try again" onPress={load} style={{ marginTop: spacing.md }} />
+          </View>
+        )}
 
         {card === null && (
           <View style={styles.emptyState}>
