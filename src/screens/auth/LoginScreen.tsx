@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Pressable, StyleSheet, SafeAreaView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
@@ -12,7 +12,7 @@ import type { AuthStackParamList } from '../../navigation/AuthNavigator';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
-export default function LoginScreen({}: Props) {
+export default function LoginScreen({ navigation }: Props) {
   const { loginWithPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +46,11 @@ export default function LoginScreen({}: Props) {
         {error && <Alert type="error">{error}</Alert>}
 
         <Input label="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <Input label="Password" value={password} onChangeText={setPassword} secureTextEntry />
+        <Input label="Password" value={password} onChangeText={setPassword} isPassword />
+
+        <Pressable onPress={() => navigation.navigate('ForgotPassword')} style={styles.forgotLink} hitSlop={8}>
+          <Text style={styles.forgotText}>Forgot password?</Text>
+        </Pressable>
 
         <Button title="Continue" onPress={submit} loading={loading} />
       </View>
@@ -60,4 +64,6 @@ const styles = StyleSheet.create({
   content: { flex: 1, padding: spacing.xl, justifyContent: 'center' },
   title: { fontSize: fontSizes.xxl, fontWeight: '700', color: colors.ink },
   subtitle: { fontSize: fontSizes.base, color: colors.slate, marginTop: 4, marginBottom: spacing.lg },
+  forgotLink: { alignSelf: 'flex-end', marginTop: -spacing.sm, marginBottom: spacing.lg },
+  forgotText: { fontSize: fontSizes.sm, fontWeight: '600', color: colors.unlock },
 });

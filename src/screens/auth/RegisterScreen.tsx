@@ -112,7 +112,7 @@ export default function RegisterScreen({ navigation }: Props) {
           placeholder="e.g. 1998-04-23"
           maxLength={10}
         />
-        <Input label="Password" value={password} onChangeText={setPassword} secureTextEntry />
+        <Input label="Password" value={password} onChangeText={setPassword} isPassword />
 
         <Text style={styles.label}>Passport photograph</Text>
         {passportUri ? (
