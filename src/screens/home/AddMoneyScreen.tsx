@@ -1,7 +1,8 @@
 import AdBanner from '../../components/AdBanner';
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Share } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Share, Pressable } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Clipboard from 'expo-clipboard';
 import * as walletApi from '../../api/wallet';
 import Button from '../../components/Button';
 import Alert from '../../components/Alert';
@@ -13,6 +14,7 @@ export default function AddMoneyScreen() {
   const [summary, setSummary] = useState<WalletSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -30,6 +32,13 @@ export default function AddMoneyScreen() {
     await Share.share({
       message: `Send money to my OffPay account:\n\nBank: ${summary.bankName}\nAccount Number: ${summary.accountNumber}\nAccount Name: ${summary.accountName ?? 'OffPay'}`,
     });
+  }
+
+  async function copyAccountNumber() {
+    if (!summary?.accountNumber) return;
+    await Clipboard.setStringAsync(summary.accountNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
@@ -50,7 +59,15 @@ export default function AddMoneyScreen() {
             <Text style={styles.label}>Transfer any amount to this account to fund your OffPay wallet.</Text>
             <View style={styles.card}>
               <Row label="Bank" value={summary.bankName ?? ''} />
-              <Row label="Account Number" value={summary.accountNumber} big />
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>Account Number</Text>
+                <View style={styles.acctNumberRow}>
+                  <Text style={[styles.rowValue, styles.rowValueBig]}>{summary.accountNumber}</Text>
+                  <Pressable onPress={copyAccountNumber} hitSlop={10} style={styles.copyBtn}>
+                    <Text style={styles.copyBtnText}>{copied ? 'Copied ✓' : 'Copy'}</Text>
+                  </Pressable>
+                </View>
+              </View>
               <Row label="Account Name" value={summary.accountName ?? 'OffPay'} />
             </View>
             <Text style={styles.note}>
@@ -85,5 +102,8 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: fontSizes.xs, color: colors.slate, marginBottom: 4 },
   rowValue: { fontSize: fontSizes.md, fontWeight: '600', color: colors.ink },
   rowValueBig: { fontSize: fontSizes.xl, fontWeight: '700', letterSpacing: 0.5 },
+  acctNumberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  copyBtn: { backgroundColor: colors.paper, borderRadius: radius.pill, paddingVertical: 6, paddingHorizontal: 14 },
+  copyBtnText: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.ink },
   note: { fontSize: fontSizes.sm, color: colors.slate, marginTop: spacing.lg, lineHeight: 18 },
 });

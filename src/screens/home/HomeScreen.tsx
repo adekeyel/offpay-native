@@ -82,18 +82,27 @@ export default function HomeScreen({ navigation }: Props) {
                 hitSlop={10}
                 style={styles.headerIconBtn}
                 onPress={() => {
-                  // Navigating straight to a nested screen on a tab that
-                  // hasn't mounted yet skips its initial route, so the
-                  // stack ends up with ONLY this screen in it — no back
-                  // button, and no way to get to MeMain from here. Mounting
-                  // the tab at its default screen first, then pushing the
-                  // target on top, guarantees a real back stack.
-                  const parent = navigation.getParent();
-                  parent?.navigate('Me' as never);
-                  parent?.navigate('Me' as never, { screen: 'SettingsSecurity' } as never);
+                  // `initial: false` is the documented way to push a screen
+                  // on top of a sibling tab's default route in one dispatch.
+                  // The previous approach (navigate('Me') immediately
+                  // followed by navigate('Me', { screen })) fired two
+                  // dispatches back-to-back before the first one's state
+                  // update had actually settled, so the second call could
+                  // still land on an uninitialized stack — same end result
+                  // as skipping the initial route: no back button, and the
+                  // "Me" tab's own tabPress reset not having a stable base
+                  // to reset to.
+                  navigation.getParent()?.navigate('Me' as never, { screen: 'SettingsSecurity', initial: false } as never);
                 }}
               >
                 <Text style={styles.headerIcon}>⚙️</Text>
+              </Pressable>
+              <Pressable
+                hitSlop={10}
+                style={styles.headerIconBtn}
+                onPress={() => navigation.getParent()?.navigate('Me' as never, { screen: 'Support', initial: false } as never)}
+              >
+                <Text style={styles.headerIcon}>🎧</Text>
               </Pressable>
               <NotificationBell onPress={() => navigation.navigate('Notifications')} />
             </View>
@@ -130,12 +139,8 @@ export default function HomeScreen({ navigation }: Props) {
           <Pressable
             style={styles.recentCard}
             onPress={() => {
-              // Same fix as the gear icon above — mount the Me tab at its
-              // default screen first so TransactionHistory is pushed on
-              // top of MeMain instead of replacing the whole stack.
-              const parent = navigation.getParent();
-              parent?.navigate('Me' as never);
-              parent?.navigate('Me' as never, { screen: 'TransactionHistory' } as never);
+              // Same fix as the gear icon above — see comment there.
+              navigation.getParent()?.navigate('Me' as never, { screen: 'TransactionHistory', initial: false } as never);
             }}
           >
             <View style={{ flex: 1 }}>
